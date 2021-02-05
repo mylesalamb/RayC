@@ -94,85 +94,83 @@ function Update(timeDelta)
 
   if doUpdate == 0 then
     return
-end
+  end
 
--- We can use the RedrawDisplay() method to clear the screen and redraw
--- the tilemap in a single call.
-RedrawDisplay()
+  -- We can use the RedrawDisplay() method to clear the screen and redraw
+  -- the tilemap in a single call.
+  RedrawDisplay()
 
-for i = 1, screenWidth, 4 do
-    local rayAngle = (pRot - fov / 2.0) + (i / screenWidth) * fov
-    local distance = 0.0
+  for i = 1, screenWidth, 4 do
+      local rayAngle = (pRot - fov / 2.0) + (i / screenWidth) * fov
+      local distance = 0.0
 
-    local collide = 0
+      local collide = 0
 
-    local eyeX = math.sin(rayAngle)
-    local eyeY = math.cos(rayAngle)
+      local eyeX = math.sin(rayAngle)
+      local eyeY = math.cos(rayAngle)
 
-    while collide ~= 1 and distance < depth do
-      
-
-        distance = distance + 0.5
-
-        local test_col = math.floor(pX + eyeX * distance)
-        local test_row = math.floor(pY + eyeY * distance)
-
-        if test_col < 0 or test_col >= mapWidth or test_row < 0 or test_row >= mapHeight then
-            collide = 1
-            distance = depth
-        else
-            if map[ (test_col - 1) * mapWidth + test_row] == 1 then
-                collide = 1
-            end
-        end
+      while collide ~= 1 and distance < depth do
         
-    end
 
-    local ceiling = (screenHeight / 2.0) - (screenHeight / distance)
-    local floor = screenHeight - ceiling
+          distance = distance + 0.5
 
-    local shading = 1
-    if distance <= depth / 4.0 then
-    shading = 1
-    elseif distance <= depth / 3.0 then
-    shading = 2
-    elseif distance <= depth / 2.0 then
-    shading = 3
-    else
-    shading = 4
-    end
+          local test_col = math.floor(pX + eyeX * distance)
+          local test_row = math.floor(pY + eyeY * distance)
 
-    for j = 1, screenHeight, 4 do
-      
-        if j <= ceiling then
-          -- DrawText( ",", j, i, DrawMode.Tile, "small", shading)
+          if test_col < 0 or test_col >= mapWidth or test_row < 0 or test_row >= mapHeight then
+              collide = 1
+              distance = depth
+          else
+              if map[ (test_col - 1) * mapWidth + test_row] == 1 then
+                  collide = 1
+              end
+          end
+          
+      end
 
-        elseif j > ceiling and j <= floor then
-          DrawRect( i, j, 4, 4, shading, DrawMode.Tile )
+      local ceiling = (screenHeight / 2.0) - (screenHeight / distance)
+      local floor = screenHeight - ceiling
 
-        else
-            local shade = "a"
-            local b = 1.0 - ((j - screenHeight / 2.0) / (screenHeight / 2.0));
+      local shading = 1
+      if distance <= depth / 4.0 then
+      shading = 1
+      elseif distance <= depth / 3.0 then
+      shading = 2
+      elseif distance <= depth / 2.0 then
+      shading = 3
+      else
+      shading = 4
+      end
 
-            if b < 0.25 then
-                shade = "#";
-            elseif b < 0.5 then
-                shade = "x";
-            elseif b < 0.75 then
-                shade = ".";
-            elseif b < 0.9 then
-                shade = "-";
-            else
-                shade = " ";
-            end
+      for j = 1, screenHeight, 4 do
+        
+          if j <= ceiling then
+            -- DrawText( ",", j, i, DrawMode.Tile, "small", shading)
 
-            -- DrawText( "-", j, i, DrawMode.Tile, "small", shading)
+          elseif j > ceiling and j <= floor then
+            DrawRect( i, j, 4, 4, shading, DrawMode.Tile )
 
-        end
-    end
-end
+          else
+              local shade = "a"
+              local b = 1.0 - ((j - screenHeight / 2.0) / (screenHeight / 2.0));
 
+              if b < 0.25 then
+                  shade = "#";
+              elseif b < 0.5 then
+                  shade = "x";
+              elseif b < 0.75 then
+                  shade = ".";
+              elseif b < 0.9 then
+                  shade = "-";
+              else
+                  shade = " ";
+              end
 
+              -- DrawText( "-", j, i, DrawMode.Tile, "small", shading)
+
+          end
+      end
+  end
 end
 
 --[[
