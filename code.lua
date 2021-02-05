@@ -17,30 +17,32 @@
 ]] --
 
 local message = "Hello this is a message from the game"
-local map = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 1, 1, 1, 0, 0, 1,
-             1, 0, 0, 0, 1, 1, 1, 0, 0, 1,
-             1, 0, 0, 0, 1, 1, 1, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 
-             1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 
-             1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+-- local map = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+--              1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+--              1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+--              1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+--              1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+--              1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+--              1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+--              1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 
+--              1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 
+--              1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 
-local pX = 1.0
-local pY = 1.0
-local pRot = 5.0
+local map = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+
+local pX = 6.0
+local pY = 5.0
+local pRot = 3.0
 
 local mapWidth = 10
 local mapHeight = 10
-local fov = 3.14159 / 2.0
+local fov = 3.14159 / 3.0
 
-local depth = 15.0
+local depth = 5.0
 local speed = 5.0
 
-local screenWidth = 256
-local screenHeight = 256
+local screenWidth = 264
+local screenHeight = 248
 
 --[[
   The Init() method is part of the game's lifecycle and called a game starts.
@@ -92,14 +94,14 @@ function Draw()
 
             distance = distance + 0.5
 
-            local test_col = pX + eyeX * distance
-            local test_row = pY + eyeY * distance
+            local test_col = math.floor(pX + eyeX * distance)
+            local test_row = math.floor(pY + eyeY * distance)
 
             if test_col < 0 or test_col >= mapWidth or test_row < 0 or test_row >= mapHeight then
                 collide = 1
                 distance = depth
             else
-                if map[test_col * mapWidth + test_row] == 1 then
+                if map[ (test_col - 1) * mapWidth + test_row] == 1 then
                     collide = 1
                 end
             end
@@ -120,13 +122,15 @@ function Draw()
         shading = 4
         end
 
+        pRot = pRot + 0.1
+
         for j = 1, screenHeight, 1 do
           
             if j <= ceiling then
               -- DrawText( ",", j, i, DrawMode.Tile, "small", shading)
 
             elseif j > ceiling and j <= floor then
-              DrawRect( j, i, 5, 5, shading, DrawMode.Tile )
+              DrawRect( i, j, 1, 1, shading, DrawMode.Tile )
 
             else
                 local shade = "a"
