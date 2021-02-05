@@ -17,18 +17,18 @@
 ]] --
 
 local message = "Hello this is a message from the game"
--- local map = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
---              1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
---              1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
---              1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
---              1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
---              1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
---              1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
---              1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 
---              1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 
---              1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+local map = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+             1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+             1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+             1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+             1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+             1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+             1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 
+             1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 
-local map = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+-- local map = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 
 local pX = 6.0
 local pY = 5.0
@@ -36,7 +36,7 @@ local pRot = 3.0
 
 local mapWidth = 10
 local mapHeight = 10
-local fov = 3.14159 / 3.0
+local fov = 3.14159 / 2.0
 
 local depth = 5.0
 local speed = 5.0
@@ -62,16 +62,119 @@ end
   timeDelta, which is the difference in milliseconds since the last frame.
 ]]--
 
+local doUpdate = 0
 function Update(timeDelta)
-  DrawText(tostring(pX), 0, 0, DrawMode.Tile, "large", 15)
+  DrawText("pX: " .. tostring(pX), 0, 0, DrawMode.Tile, "small", 15)
+  DrawText("pY: " .. tostring(pY), 0, 1, DrawMode.Tile, "small", 15)
+  DrawText("pR: " .. tostring(pRot), 0, 2, DrawMode.Tile, "small", 15)
+
+  doUpdate = 0
 
   if Key(Keys.W) then
     pX = round(pX + 0.1, 1)
+    doUpdate = 1
   end
 
   if Key(Keys.S) then
     pX = round(pX - 0.1, 1)
+    doUpdate = 1
   end
+
+
+  if Key(Keys.A) then
+    pRot = round(pRot + 0.1, 1)
+    doUpdate = 1
+  end
+
+  if Key(Keys.D) then
+    pRot = round(pRot - 0.1, 1)
+    doUpdate = 1
+  end
+
+
+  if doUpdate == 0 then
+    return
+end
+
+-- We can use the RedrawDisplay() method to clear the screen and redraw
+-- the tilemap in a single call.
+RedrawDisplay()
+
+for i = 1, screenWidth, 4 do
+    local rayAngle = (pRot - fov / 2.0) + (i / screenWidth) * fov
+    local distance = 0.0
+
+    local collide = 0
+
+    local eyeX = math.sin(rayAngle)
+    local eyeY = math.cos(rayAngle)
+
+    while collide ~= 1 and distance < depth do
+      
+
+        distance = distance + 0.5
+
+        local test_col = math.floor(pX + eyeX * distance)
+        local test_row = math.floor(pY + eyeY * distance)
+
+        if test_col < 0 or test_col >= mapWidth or test_row < 0 or test_row >= mapHeight then
+            collide = 1
+            distance = depth
+        else
+            if map[ (test_col - 1) * mapWidth + test_row] == 1 then
+                collide = 1
+            end
+        end
+        
+    end
+
+    local ceiling = (screenHeight / 2.0) - (screenHeight / distance)
+    local floor = screenHeight - ceiling
+
+    local shading = 1
+    if distance <= depth / 4.0 then
+    shading = 1
+    elseif distance <= depth / 3.0 then
+    shading = 2
+    elseif distance <= depth / 2.0 then
+    shading = 3
+    else
+    shading = 4
+    end
+
+    pRot = pRot + 0.1
+
+    for j = 1, screenHeight, 4 do
+      
+        if j <= ceiling then
+          -- DrawText( ",", j, i, DrawMode.Tile, "small", shading)
+
+        elseif j > ceiling and j <= floor then
+          DrawRect( i, j, 4, 4, shading, DrawMode.Tile )
+
+        else
+            local shade = "a"
+            local b = 1.0 - ((j - screenHeight / 2.0) / (screenHeight / 2.0));
+
+            if b < 0.25 then
+                shade = "#";
+            elseif b < 0.5 then
+                shade = "x";
+            elseif b < 0.75 then
+                shade = ".";
+            elseif b < 0.9 then
+                shade = "-";
+            else
+                shade = " ";
+            end
+
+            -- DrawText( "-", j, i, DrawMode.Tile, "small", shading)
+
+        end
+    end
+end
+
+
 end
 
 --[[
@@ -81,83 +184,7 @@ end
 ]]--
 function Draw()
 
-    -- We can use the RedrawDisplay() method to clear the screen and redraw
-    -- the tilemap in a single call.
-    RedrawDisplay()
     
-    for i = 1, screenWidth, 1 do
-        local rayAngle = (pRot - fov / 2.0) + (i / screenWidth) * fov
-        local distance = 0.0
-
-        local collide = 0
-
-        local eyeX = math.sin(rayAngle)
-        local eyeY = math.cos(rayAngle)
-
-        while collide ~= 1 and distance < depth do
-          
-
-            distance = distance + 0.5
-
-            local test_col = math.floor(pX + eyeX * distance)
-            local test_row = math.floor(pY + eyeY * distance)
-
-            if test_col < 0 or test_col >= mapWidth or test_row < 0 or test_row >= mapHeight then
-                collide = 1
-                distance = depth
-            else
-                if map[ (test_col - 1) * mapWidth + test_row] == 1 then
-                    collide = 1
-                end
-            end
-            
-        end
-
-        local ceiling = (screenHeight / 2.0) - (screenHeight / distance)
-        local floor = screenHeight - ceiling
-
-        local shading = 1
-        if distance <= depth / 4.0 then
-        shading = 1
-        elseif distance <= depth / 3.0 then
-        shading = 2
-        elseif distance <= depth / 2.0 then
-        shading = 3
-        else
-        shading = 4
-        end
-
-        pRot = pRot + 0.1
-
-        for j = 1, screenHeight, 1 do
-          
-            if j <= ceiling then
-              -- DrawText( ",", j, i, DrawMode.Tile, "small", shading)
-
-            elseif j > ceiling and j <= floor then
-              DrawRect( i, j, 1, 1, shading, DrawMode.Tile )
-
-            else
-                local shade = "a"
-                local b = 1.0 - ((j - screenHeight / 2.0) / (screenHeight / 2.0));
-
-                if b < 0.25 then
-                    shade = "#";
-                elseif b < 0.5 then
-                    shade = "x";
-                elseif b < 0.75 then
-                    shade = ".";
-                elseif b < 0.9 then
-                    shade = "-";
-                else
-                    shade = " ";
-                end
-
-                -- DrawText( "-", j, i, DrawMode.Tile, "small", shading)
-
-            end
-        end
-    end
 end
 
 
