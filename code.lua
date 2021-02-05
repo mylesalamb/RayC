@@ -61,7 +61,15 @@ end
 ]]--
 
 function Update(timeDelta)
-  DrawTriangle({100, 50}, {50, 100}, true, 1)
+  DrawText(tostring(pX), 0, 0, DrawMode.Tile, "large", 15)
+
+  if Key(Keys.W) then
+    pX = round(pX + 0.1, 1)
+  end
+
+  if Key(Keys.S) then
+    pX = round(pX - 0.1, 1)
+  end
 end
 
 --[[
@@ -154,7 +162,7 @@ function DrawTriangle(pointA, pointB, top, color)
   aX, aY, bX, bY = pointA[1], pointA[2], pointB[1], pointB[2]
 
   if aX > bX then
-    local tempX, tempY = aX, aY
+    tempX, tempY = aX, aY
     aX, aY = bX, bY
     bX, bY = tempX, tempY
   end
