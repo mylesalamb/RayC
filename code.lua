@@ -202,32 +202,13 @@ function DrawTriangle(pointA, pointB, top, color)
   for x = aX, bX do
     y = equationOfALine(x, m, b)
     if top then
-      DrawRect(x, min(aY, bY), 1, abs(min(aY, bY) - y), color)
+      DrawRect(x, math.min(aY, bY), 1, math.abs(math.min(aY, bY) - y), color)
     else
-      DrawRect(x, y, 1, abs(y - aY), color)
+      DrawRect(x, y, 1, math.abs(y - aY), color)
     end
   end
 end
 
-
--- find max
-function min(a, b)
-  if a < b then
-    return a
-  else
-    return b
-  end
-end
-
-
--- absolute value
-function abs(value)
-  if value < 0 then
-    return value * -1
-  else
-    return value
-  end
-end
 
 
 -- return a y given an m and b for a given x
