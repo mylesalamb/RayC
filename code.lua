@@ -16,7 +16,32 @@
   of fonts into the default.font.png. Use uppercase for larger characters and
   lowercase for a smaller one.
 ]]--
-local message = "EMPTY GAME\n\n\nThis is an empty game template.\n\n\nVisit 'www.pixelvision8.com' to learn more about creating games from scratch."
+local message = "Hello this is a message from the game"
+local map = {1,1,1,1,1,1,1,1,1,1,
+             1,0,0,0,0,0,0,0,0,1,
+             1,0,0,0,0,0,0,0,0,1,
+             1,0,0,0,1,1,1,0,0,1,
+             1,0,0,0,1,1,1,0,0,1,
+             1,0,0,0,1,1,1,0,0,1,
+             1,0,0,0,0,0,0,0,0,1,
+             1,0,0,0,0,0,0,0,0,1,
+             1,0,0,0,0,0,0,0,0,1,
+             1,1,1,1,1,1,1,1,1,1,}
+
+
+local pX = 1.0
+local pY = 1.0
+local pRot = 2.0
+
+local mapWidth = 10
+local mapHeight = 10
+local fov = 3.14159 / 2.0
+
+local depth = 15.0
+local speed = 5.0
+
+local screenWidth = 256
+local screenHeight = 256
 
 --[[
   The Init() method is part of the game's lifecycle and called a game starts.
@@ -30,19 +55,10 @@ function Init()
 
   local display = Display()
 
-  -- We are going to render the message in a box as tiles. To do this, we
-  -- need to wrap the text, then split it into lines and draw each line.
-  local wrap = WordWrap(message, (display.x / 8) - 2)
-  local lines = SplitLines(wrap)
-  local total = #lines
-  local startY = ((display.y / 8) - 1) - total
 
-  -- We want to render the text from the bottom of the screen so we offset
-  -- it and loop backwards.
-  for i = total, 1, - 1 do
-    DrawText(lines[i], 1, startY + (i - 1), DrawMode.Tile, "large", 15)
-  end
 
+
+  
 end
 
 --[[
@@ -67,6 +83,69 @@ function Draw()
   -- the tilemap in a single call.
   RedrawDisplay()
 
-  -- TODO add your own draw logic here.
+  for i=screenWidth, 1, 1 do
+    local rayAngle = (pRot - fov / 2.0) + (i / screenWidth) * fov
+    local distance = 0.0
+
+    local collide = 0
+
+    local eyeX = math.sin(rayAngle)
+    local eyeY = math.cos(rayAngle)
+
+    while collide == 1 and distance < depth do
+
+      distance += 0.5
+
+      local test_col = pX + eyeX * distance
+      local test_row = pY + eyeY * distance
+
+      if test_col < 0 or test_col >= mapWidth or test_row < 0 or test_row >= mapHeight then
+        collide = 1
+        distance = depth
+      else
+        if map[test_col * mapWidth + test_row] == 1 then
+            collide = 1
+        end
+      end
+    end
+
+    local ceiling = (screenHeight / 2.0) - (screenHeight / distance)
+    local floot = screenHeight - ceiling
+    
+    
+    local shade = 0
+    if distance <= depth / 4.0 then
+      shade = 1
+    elseif distance <= depth / 3.0 then
+
+    elseif distance <= depth / 2.0 then
+
+    else
+
+    end
+
+
+    for j=screenHeight, 1, 1 do
+
+      if j <= ceiling then
+        -- we have a blank space, place some texture
+
+    elseif j > ceiling and j <= floor then
+
+    else
+      -- shade floor based on distance
+      
+
+      end
+
+
+
+    end
+    
+
+
+  end
 
 end
+
+
