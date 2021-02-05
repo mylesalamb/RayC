@@ -22,7 +22,7 @@
   "GameChip":
   {
     "lockSpecs": true,
-    "maxSize": 512,
+    "maxSize": 1024,
     "saveSlots": 8
   },
   "MusicChip":
@@ -44,7 +44,7 @@
     "spriteWidth": 8,
     "spriteHeight": 8,
     "pages": 8,
-    "cps": 16
+    "cps": 1024
   },
   "TilemapChip":
   {
