@@ -12,37 +12,12 @@
 ]]--
 
 --[[
-  This this is an empty game, we will the following text. We combined two sets
-  of fonts into the default.font.png. Use uppercase for larger characters and
-  lowercase for a smaller one.
-]]--
-local message = "EMPTY GAME\n\n\nThis is an empty game template.\n\n\nVisit 'www.pixelvision8.com' to learn more about creating games from scratch."
-
---[[
   The Init() method is part of the game's lifecycle and called a game starts.
   We are going to use this method to configure background color,
   ScreenBufferChip and draw a text box.
 ]]--
 function Init()
-
-  -- Here we are manually changing the background color
   BackgroundColor(0)
-
-  local display = Display()
-
-  -- We are going to render the message in a box as tiles. To do this, we
-  -- need to wrap the text, then split it into lines and draw each line.
-  local wrap = WordWrap(message, (display.x / 8) - 2)
-  local lines = SplitLines(wrap)
-  local total = #lines
-  local startY = ((display.y / 8) - 1) - total
-
-  -- We want to render the text from the bottom of the screen so we offset
-  -- it and loop backwards.
-  for i = total, 1, - 1 do
-    DrawText(lines[i], 1, startY + (i - 1), DrawMode.Tile, "large", 15)
-  end
-
 end
 
 --[[
@@ -50,10 +25,9 @@ end
   Update() on every frame before the Draw() method. It accepts one argument,
   timeDelta, which is the difference in milliseconds since the last frame.
 ]]--
+
 function Update(timeDelta)
-
-  -- TODO add your own update logic here
-
+  DrawTriangle({100, 50}, {50, 100}, true, 1)
 end
 
 --[[
@@ -69,4 +43,62 @@ function Draw()
 
   -- TODO add your own draw logic here.
 
+end
+
+
+-- draw a traingle
+function DrawTriangle(pointA, pointB, top, color)
+  aX, aY, bX, bY = pointA[1], pointA[2], pointB[1], pointB[2]
+
+  if aX > bX then
+    local tempX, tempY = aX, aY
+    aX, aY = bX, bY
+    bX, bY = tempX, tempY
+  end
+
+  m = bY - aY / bX - aX
+  b = aY - (m * aX)
+
+  for x = aX, bX do
+    y = equationOfALine(x, m, b)
+    if top then
+      DrawRect(x, min(aY, bY), 1, abs(min(aY, bY) - y), color)
+    else
+      DrawRect(x, y, 1, abs(y - aY), color)
+    end
+  end
+end
+
+
+-- find max
+function min(a, b)
+  if a < b then
+    return a
+  else
+    return b
+  end
+end
+
+
+-- absolute value
+function abs(value)
+  if value < 0 then
+    return value * -1
+  else
+    return value
+  end
+end
+
+
+-- return a y given an m and b for a given x
+function equationOfALine(x, m, b)
+    local returnY = (m * x) + b
+    return round(returnY)
+end
+
+
+-- round
+function round(num, numDecimalPlaces)
+  local mult = 10^(numDecimalPlaces or 0)
+  return math.floor(num * mult + 0.5) / mult
 end
