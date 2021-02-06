@@ -8,11 +8,11 @@ local pX = 3.0
 local pY = 3.0
 local pRot = 0
 
-local mapWidth = 18
-local mapHeight = 18
+local mapWidth = 12
+local mapHeight = 12
 local fov = 0.6 -- 3.14159 / 2.0
 
-local depth = 18.0
+local depth = 12.0
 local speed = 5.0
 
 local display = Display()
@@ -65,15 +65,15 @@ function DrawFrame()
 end
 
 function randomObjective()
-    local i = math.random(3, 16)
-    local j = math.random(3, 16)
+    local i = math.random(2, mapWidth - 2)
+    local j = math.random(2, mapHeight - 2)
 
     map[i + j * mapHeight] = 2
 end
 
 function defineExit()
     local i = 0
-    local j = 10
+    local j = 8
 
     map[i + j * mapHeight] = 3
 end
@@ -87,6 +87,9 @@ function Init()
     -- Here we are manually changing the background color
     BackgroundColor(0)
     InitMap()
+
+    randomObjective()
+    defineExit()
 end
 
 --[[
@@ -105,9 +108,14 @@ function calculateDisplacement(amount)
         xDisplace = math.sin(pRot) * amount
         yDisplace = amount - xDisplace
 
-        if (map[math.floor(pX + xDisplace) + math.floor(pY + yDisplace) * mapWidth] ~= 1) then
-            pY = pY + yDisplace
-            pX = pX + xDisplace
+        state = map[math.floor(pX + xDisplace) + math.floor(pY + yDisplace) * mapWidth]
+        if (state ~= 1) then
+          if state == 2 then
+            map[math.floor(pX + xDisplace) + math.floor(pY + yDisplace) * mapWidth] = 0
+            exitHidden = false
+          end
+          pY = pY + yDisplace
+          pX = pX + xDisplace
         end
 
     elseif pRot >= 1.57 and pRot <= 3.14 then
@@ -116,9 +124,14 @@ function calculateDisplacement(amount)
         yDisplace = math.sin(realRot) * amount
         xDisplace = (amount - yDisplace)
 
-        if (map[math.floor(pX + xDisplace) + math.floor(pY - yDisplace) * mapWidth] ~= 1) then
-            pY = pY - yDisplace
-            pX = pX + xDisplace
+        state = map[math.floor(pX + xDisplace) + math.floor(pY - yDisplace) * mapWidth]
+        if (state ~= 1) then
+          if state == 2 then
+            map[math.floor(pX + xDisplace) + math.floor(pY - yDisplace) * mapWidth] = 0
+            exitHidden = false
+          end
+          pY = pY - yDisplace
+          pX = pX + xDisplace
         end
 
     elseif pRot >= 3.14 and pRot < 4.71 then
@@ -127,9 +140,14 @@ function calculateDisplacement(amount)
         xDisplace = math.sin(realRot) * amount
         yDisplace = amount - xDisplace
 
-        if (map[math.floor(pX - xDisplace) + math.floor(pY - yDisplace) * mapWidth] ~= 1) then
-            pY = pY - yDisplace
-            pX = pX - xDisplace
+        state = map[math.floor(pX - xDisplace) + math.floor(pY - yDisplace) * mapWidth]
+        if (state ~= 1) then
+          if state == 2 then
+            map[math.floor(pX - xDisplace) + math.floor(pY - yDisplace) * mapWidth] = 0
+            exitHidden = false
+          end
+          pY = pY - yDisplace
+          pX = pX - xDisplace
         end
 
     else
@@ -138,9 +156,14 @@ function calculateDisplacement(amount)
         yDisplace = math.sin(realRot) * amount
         xDisplace = amount - yDisplace
 
-        if (map[math.floor((pX - xDisplace) + (pY + yDisplace) * mapWidth)] ~= 1) then
-            pY = pY + yDisplace
-            pX = pX - xDisplace
+        state = map[math.floor((pX - xDisplace) + (pY + yDisplace) * mapWidth)]
+        if (state ~= 1) then
+          if state == 2 then
+            map[math.floor((pX - xDisplace) + (pY + yDisplace) * mapWidth)] = 0
+            exitHidden = false
+          end
+          pY = pY + yDisplace
+          pX = pX - xDisplace
         end
     end
 end
@@ -310,7 +333,7 @@ function Update(timeDelta)
                         shade = " ";
                     end
 
-                    DrawText(shade, i, j, DrawMode.UI, "small", 2)
+                    -- DrawText(shade, i, j, DrawMode.UI, "small", 2)
                 end
             end
         end
