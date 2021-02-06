@@ -112,7 +112,7 @@ function calculateDisplacement(amount)
         yDisplace = amount - xDisplace
 
         if (map[math.floor(pX + xDisplace) + math.floor(pY + yDisplace) * mapWidth] ~= 1) then
-          if (math.floor(pX + xDisplace) == objective[1] and math.floor(pY + yDisplace) == objective[2]) then
+          if (map[math.floor(pX + xDisplace) + math.floor(pY + yDisplace) * mapWidth] == 2) then
             map[objective[1] + objective[2] * mapWidth] = 0
             exitHidden = false
             DrawText("objective found!", 0, 0, DrawMode.UI, "large", 15)
@@ -128,7 +128,7 @@ function calculateDisplacement(amount)
         xDisplace = (amount - yDisplace)
 
         if (map[math.floor(pX + xDisplace) + math.floor(pY - yDisplace) * mapWidth] ~= 1) then
-          if (math.floor(pX + xDisplace) == objective[1] and math.floor(pY - yDisplace) == objective[2]) then
+          if (map[math.floor(pX + xDisplace) + math.floor(pY - yDisplace) * mapWidth] == 2) then
             map[objective[1] + objective[2] * mapWidth] = 0
             exitHidden = false
             DrawText("objective found!", 0, 0, DrawMode.UI, "large", 15)
@@ -144,7 +144,7 @@ function calculateDisplacement(amount)
         yDisplace = amount - xDisplace
 
         if (map[math.floor(pX - xDisplace) + math.floor(pY - yDisplace) * mapWidth] ~= 1) then
-          if (math.floor(pX - xDisplace) == objective[1] and math.floor(pY - yDisplace) == objective[2]) == 2 then
+          if (map[math.floor(pX - xDisplace) + math.floor(pY - yDisplace) * mapWidth] == 2) then
             map[objective[1] + objective[2] * mapWidth] = 0
             exitHidden = false
             DrawText("objective found!", 0, 0, DrawMode.UI, "large", 15)
@@ -160,7 +160,7 @@ function calculateDisplacement(amount)
         xDisplace = amount - yDisplace
 
         if (map[math.floor((pX - xDisplace) + (pY + yDisplace) * mapWidth)] ~= 1) then
-          if (math.floor(pX - xDisplace) == objective[1] and math.floor(pY + yDisplace) == objective[2]) == 2 then
+          if (map[math.floor((pX - xDisplace) + (pY + yDisplace) * mapWidth)] == 2) then
             map[objective[1] + objective[2] * mapWidth] = 0
             exitHidden = false
             DrawText("objective found!", 0, 0, DrawMode.UI, "large", 15)
