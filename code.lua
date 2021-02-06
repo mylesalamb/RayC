@@ -201,19 +201,32 @@ for i = 0, screenWidth, chunkSz do
     local floor = screenHeight - ceiling
 
     local shading = 1
-    if distance <= depth / 6.0 then
-      shading = 6
-    elseif distance <= depth / 5.0 then
-      shading = 5
-    elseif distance <= depth / 4.0 then
-      shading = 4
-    elseif distance <= depth / 3.0 then
-      shading = 3
-    elseif distance <= depth / 2.0 then
-      shading = 2
-    elseif distance <= depth / 1.0 then
+    shading = 10 - math.floor(distance + 0.5)
+    if shading < 1 then
       shading = 1
     end
+    
+    -- if distance <= depth / 6.0 then
+    --   shading = 6
+    -- elseif distance <= depth / 5.0 then
+    --   shading = 5
+    -- elseif distance <= depth / 4.0 then
+    --   shading = 4
+    -- elseif distance <= depth / 3.0 then
+    --   shading = 3
+    -- elseif distance <= depth / 2.0 then
+    --   shading = 2
+    -- elseif distance <= depth / 1.0 then
+    --   shading = 1
+    -- elseif distance <= depth / 1.0 then
+    --   shading = 1
+    -- elseif distance <= depth / 1.0 then
+    --   shading = 1
+    -- elseif distance <= depth / 1.0 then
+    --   shading = 1
+    -- elseif distance <= depth / 1.0 then
+    --   shading = 1
+    -- end
 
     for j = 0, screenHeight, chunkSz do
 
