@@ -75,10 +75,6 @@ function Init()
     -- Here we are manually changing the background color
     BackgroundColor(0)
     InitMap()
-    randomObjective()
-    defineExit()
-
-    local display = Display()
 end
 
 --[[
