@@ -77,13 +77,13 @@ function calculateDisplacement(amount)
     -- the user presses the forward key but this does not translate to a pure X movement
 
     if pRot >= 0 and pRot <= 1.57 then
-        
+
         xDisplace = math.sin(pRot) * amount
         yDisplace = amount - xDisplace
 
         pY = pY + yDisplace
         pX = pX + xDisplace
-    
+
     elseif pRot >= 1.57 and pRot <= 3.14  then
         local realRot = pRot
         yDisplace = math.sin(realRot) * amount
@@ -93,7 +93,7 @@ function calculateDisplacement(amount)
         pX = pX + xDisplace
 
 
-    
+
     elseif pRot >= 3.14 and pRot < 4.71 then
         local realRot = pRot - (2 * 1.57)
         xDisplace = math.sin(realRot) * amount
@@ -179,7 +179,7 @@ for i = 0, screenWidth, chunkSz do
     local eyeY = math.cos(rayAngle)
 
     while collide ~= 1 and distance < depth do
-      
+
 
         distance = distance + 0.5
 
@@ -194,7 +194,7 @@ for i = 0, screenWidth, chunkSz do
                 collide = 1
             end
         end
-        
+
     end
 
     local ceiling = (screenHeight / 2.0) - (screenHeight / distance)
@@ -202,17 +202,21 @@ for i = 0, screenWidth, chunkSz do
 
     local shading = 1
     if distance <= depth / 6.0 then
-    shading = 1
+      shading = 6
+    elseif distance <= depth / 5.0 then
+      shading = 5
     elseif distance <= depth / 4.0 then
-    shading = 2
+      shading = 4
+    elseif distance <= depth / 3.0 then
+      shading = 3
     elseif distance <= depth / 2.0 then
-    shading = 3
-    else
-    shading = 4
+      shading = 2
+    elseif distance <= depth / 1.0 then
+      shading = 1
     end
 
     for j = 0, screenHeight, chunkSz do
-      
+
         if j <= ceiling then
           -- DrawText( ",", j, i, DrawMode.Tile, "small", shading)
 
@@ -251,7 +255,7 @@ end
 ]]--
 function Draw()
 
-    
+
 end
 
 
