@@ -17,16 +17,24 @@
 ]] --
 
 local message = "Hello this is a message from the game"
-local map = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 1, 1, 1, 0, 0, 1,
-             1, 0, 0, 0, 1, 1, 1, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 
-             1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 
-             1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+local map = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
+             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,1,
+             1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,1,
+             1, 0, 0, 0, 1, 1, 1, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
+             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,1,
+             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,1, 
+             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
+             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
+             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
+             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
+             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
+             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
+             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
+             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
+             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1, 
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,}
 
 -- local map = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 
@@ -36,13 +44,15 @@ local pRot = 0
 
 local mapWidth = 10
 local mapHeight = 10
-local fov = 3.14159 / 2.0
+local fov = 3.14159 / 1.5
 
-local depth = 5.0
+local depth = 18.0
 local speed = 5.0
 
 local screenWidth = 264
 local screenHeight = 248
+
+local chunkSz = 2
 
 --[[
   The Init() method is part of the game's lifecycle and called a game starts.
@@ -62,32 +72,80 @@ end
   timeDelta, which is the difference in milliseconds since the last frame.
 ]]--
 
-local doUpdate = 0
+function calculateDisplacement(amount)
+
+    -- we have cases in four quadrants to find the displacement along the line
+    -- the user presses the forward key but this does not translate to a pure X movement
+
+    if pRot >= 0 and pRot <= 1.57 then
+        
+        xDisplace = math.sin(pRot) * amount
+        yDisplace = amount - xDisplace
+
+        pY = pY + yDisplace
+        pX = pX + xDisplace
+    
+    elseif pRot >= 1.57 and pRot <= 3.14  then
+        local realRot = pRot
+        yDisplace = math.sin(realRot) * amount
+        xDisplace = (amount - yDisplace)
+
+        pY = pY - yDisplace
+        pX = pX + xDisplace
+
+
+    
+    elseif pRot >= 3.14 and pRot < 4.71 then
+        local realRot = pRot - (2 * 1.57)
+        xDisplace = math.sin(realRot) * amount
+        yDisplace = amount - xDisplace
+
+        pY = pY - yDisplace
+        pX = pX - xDisplace
+    else
+        local realRot = pRot - (2 * 1.57)
+        yDisplace = math.sin(realRot) * amount
+        xDisplace = amount - yDisplace
+
+        pY = pY + yDisplace
+        pX = pX - xDisplace
+    end
+
+
+end
+
+local doUpdate = 1
 function Update(timeDelta)
-  DrawText("pX: " .. tostring(pX), 0, 0, DrawMode.Tile, "small", 15)
-  DrawText("pY: " .. tostring(pY), 0, 1, DrawMode.Tile, "small", 15)
-  DrawText("pR: " .. tostring(pRot), 0, 2, DrawMode.Tile, "small", 15)
+  DrawText("pX: " .. tostring(round(pX, 1)), 0, 0, DrawMode.Tile, "medium", 15)
+  DrawText("pY: " .. tostring(round(pY, 1)), 0, 1, DrawMode.Tile, "medium", 15)
+  DrawText("pR: " .. tostring(round(pRot, 1)), 0, 2, DrawMode.Tile, "medium", 15)
 
   doUpdate = 0
 
   if Key(Keys.W) then
-    pX = round(pX + 0.1, 1)
+    calculateDisplacement(0.5)
     doUpdate = 1
   end
 
   if Key(Keys.S) then
-    pX = round(pX - 0.1, 1)
+    calculateDisplacement(-0.5)
     doUpdate = 1
   end
 
 
   if Key(Keys.A) then
-    pRot = round(pRot + 0.1, 1)
+    pRot = round(pRot - 0.1, 1)
+    if pRot < 0 then
+        pRot = 6.23
+    end
     doUpdate = 1
   end
 
   if Key(Keys.D) then
-    pRot = round(pRot - 0.1, 1)
+    pRot = round(pRot + 0.1, 1)
+    if pRot > 6.23 then
+        pRot = 0
+    end
     doUpdate = 1
   end
 
@@ -100,7 +158,7 @@ end
 -- the tilemap in a single call.
 RedrawDisplay()
 
-for i = 1, screenWidth, 4 do
+for i = 1, screenWidth, chunkSz do
     local rayAngle = (pRot - fov / 2.0) + (i / screenWidth) * fov
     local distance = 0.0
 
@@ -142,13 +200,13 @@ for i = 1, screenWidth, 4 do
     shading = 4
     end
 
-    for j = 1, screenHeight, 4 do
+    for j = 1, screenHeight, chunkSz do
       
         if j <= ceiling then
           -- DrawText( ",", j, i, DrawMode.Tile, "small", shading)
 
         elseif j > ceiling and j <= floor then
-          DrawRect( i, j, 4, 4, shading, DrawMode.Tile )
+          DrawRect( i, j, chunkSz, chunkSz, shading, DrawMode.Tile )
 
         else
             local shade = "a"
@@ -166,7 +224,7 @@ for i = 1, screenWidth, 4 do
                 shade = " ";
             end
 
-            -- DrawText( "-", j, i, DrawMode.Tile, "small", shading)
+            --  DrawText( "-", j, i, DrawMode.Tile, "small", shading)
 
         end
     end
