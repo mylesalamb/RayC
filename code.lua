@@ -40,7 +40,17 @@ function Vector:magnitude()
 end
 
 function Vector:normalise()
-  return math.sqrt( self * self )
+  self.i = self.i / self:magnitude()
+  self.j = self.j / self:magnitude()
+end
+
+function Vector:rotate(angle)
+  local oldAngle = math.atan2(self.j, self.i)
+  angle = angle + oldAngle
+
+  local x = (self.i * math.cos(angle)) - (self.j * math.sin(angle))
+  local y = (self.i * math.sin(angle)) + (self.j * math.cos(angle))
+  self.i, self.j = x, y
 end
 
 
@@ -73,6 +83,14 @@ function Ray:setDirection(x, y)
   self.dir.i = x - self.pos.i
   self.dir.j = y - self.pos.j
   self.dir:normalise()
+end
+
+function Ray:changeAngle(angle)
+  self.dir:rotate(angle)
+end
+
+function Ray:getAngle(angle)
+  return math.atan2(self.dir.j, self.dir.i)
 end
 
 function Ray:cast(wall)
@@ -201,17 +219,26 @@ function calculateDisplacement(amount)
 end
 
 local doUpdate = 1
+local ray = Ray:create(1, 1)
 function Update(timeDelta)
-  DrawText("pX: " .. tostring(round(pX, 1)), 0, 0, DrawMode.Tile, "medium", 15)
-  DrawText("pY: " .. tostring(round(pY, 1)), 0, 1, DrawMode.Tile, "medium", 15)
-  DrawText("pR: " .. tostring(round(pRot, 1)), 0, 2, DrawMode.Tile, "medium", 15)
+  local pt = ""
 
-  local ray = Ray:create(1, 1)
-  local pt = ray:cast(world[4])
-  if pt == nil then
-    pt = ""
+  DrawText("pX: " .. tostring(round(pX, 1)), 0, 0, DrawMode.Tile, "large", 15)
+  DrawText("pY: " .. tostring(round(pY, 1)), 0, 1, DrawMode.Tile, "large", 15)
+  DrawText("pR: " .. tostring(round(pRot, 1)), 0, 2, DrawMode.Tile, "large", 15)
+
+  for index = 1, 4 do
+    local cast = ray:cast(world[index])
+
+    if cast then
+      pt = cast
+    end
+
+    DrawText("intersect wall " .. tostring(index) .. ": " .. tostring(pt), 0, 3 + index, DrawMode.Tile, "large", 15)
   end
-  DrawText("intersect: " .. tostring(pt), 0, 2, DrawMode.Tile, "medium", 15)
+
+  DrawText("ray angle: " .. tostring(ray:getAngle() * 180 / math.pi), 0, 9, DrawMode.Tile, "large", 15)
+  ray:changeAngle(1 * math.pi / 180)
 
   doUpdate = 0
 
@@ -257,84 +284,83 @@ end
 
 -- We can use the RedrawDisplay() method to clear the screen and redraw
 -- the tilemap in a single call.
-RedrawDisplay()
-
-for i = 1, screenWidth, chunkSz do
-    local rayAngle = (pRot - fov / 2.0) + (i / screenWidth) * fov
-    local distance = 0.0
-
-    local collide = 0
-
-    local eyeX = math.sin(rayAngle)
-    local eyeY = math.cos(rayAngle)
-
-    while collide ~= 1 and distance < depth do
-
-
-        distance = distance + 0.5
-
-        local test_col = math.floor(pX + eyeX * distance)
-        local test_row = math.floor(pY + eyeY * distance)
-
-        if test_col < 0 or test_col >= mapWidth or test_row < 0 or test_row >= mapHeight then
-            collide = 1
-            distance = depth
-        else
-            if map[ (test_col - 1) * mapWidth + test_row] == 1 then
-                collide = 1
-            end
-        end
-
-    end
-
-    local ceiling = (screenHeight / 2.0) - (screenHeight / distance)
-    local floor = screenHeight - ceiling
-
-    local shading = 1
-    if distance <= depth / 6.0 then
-      shading = 6
-    elseif distance <= depth / 5.0 then
-      shading = 5
-    elseif distance <= depth / 4.0 then
-      shading = 4
-    elseif distance <= depth / 3.0 then
-      shading = 3
-    elseif distance <= depth / 2.0 then
-      shading = 2
-    elseif distance <= depth / 1.0 then
-      shading = 1
-    end
-
-    for j = 1, screenHeight, chunkSz do
-
-        if j <= ceiling then
-          -- DrawText( ",", j, i, DrawMode.Tile, "small", shading)
-
-        elseif j > ceiling and j <= floor then
-          DrawRect( i, j, chunkSz, chunkSz, shading, DrawMode.Tile )
-
-        else
-            local shade = "a"
-            local b = 1.0 - ((j - screenHeight / 2.0) / (screenHeight / 2.0));
-
-            if b < 0.25 then
-                shade = "#";
-            elseif b < 0.5 then
-                shade = "x";
-            elseif b < 0.75 then
-                shade = ".";
-            elseif b < 0.9 then
-                shade = "-";
-            else
-                shade = " ";
-            end
-
-            --  DrawText( "-", j, i, DrawMode.Tile, "small", shading)
-
-        end
-    end
-end
-
+--
+-- for i = 1, screenWidth, chunkSz do
+--     local rayAngle = (pRot - fov / 2.0) + (i / screenWidth) * fov
+--     local distance = 0.0
+--
+--     local collide = 0
+--
+--     local eyeX = math.sin(rayAngle)
+--     local eyeY = math.cos(rayAngle)
+--
+--     while collide ~= 1 and distance < depth do
+--
+--
+--         distance = distance + 0.5
+--
+--         local test_col = math.floor(pX + eyeX * distance)
+--         local test_row = math.floor(pY + eyeY * distance)
+--
+--         if test_col < 0 or test_col >= mapWidth or test_row < 0 or test_row >= mapHeight then
+--             collide = 1
+--             distance = depth
+--         else
+--             if map[ (test_col - 1) * mapWidth + test_row] == 1 then
+--                 collide = 1
+--             end
+--         end
+--
+--     end
+--
+--     local ceiling = (screenHeight / 2.0) - (screenHeight / distance)
+--     local floor = screenHeight - ceiling
+--
+--     local shading = 1
+--     if distance <= depth / 6.0 then
+--       shading = 6
+--     elseif distance <= depth / 5.0 then
+--       shading = 5
+--     elseif distance <= depth / 4.0 then
+--       shading = 4
+--     elseif distance <= depth / 3.0 then
+--       shading = 3
+--     elseif distance <= depth / 2.0 then
+--       shading = 2
+--     elseif distance <= depth / 1.0 then
+--       shading = 1
+--     end
+--
+--     for j = 1, screenHeight, chunkSz do
+--
+--         if j <= ceiling then
+--           -- DrawText( ",", j, i, DrawMode.Tile, "small", shading)
+--
+--         elseif j > ceiling and j <= floor then
+--           DrawRect( i, j, chunkSz, chunkSz, shading, DrawMode.Tile )
+--
+--         else
+--             local shade = "a"
+--             local b = 1.0 - ((j - screenHeight / 2.0) / (screenHeight / 2.0));
+--
+--             if b < 0.25 then
+--                 shade = "#";
+--             elseif b < 0.5 then
+--                 shade = "x";
+--             elseif b < 0.75 then
+--                 shade = ".";
+--             elseif b < 0.9 then
+--                 shade = "-";
+--             else
+--                 shade = " ";
+--             end
+--
+--             --  DrawText( "-", j, i, DrawMode.Tile, "small", shading)
+--
+--         end
+--     end
+-- end
+--
 
 end
 
@@ -345,6 +371,7 @@ end
 ]]--
 function Draw()
 
+  RedrawDisplay()
 
 end
 
