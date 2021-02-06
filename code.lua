@@ -34,8 +34,7 @@ local fov = 0.6 --3.14159 / 2.0
 local depth = 18.0
 local speed = 5.0
 
-local screenWidth = 256
-local screenHeight = 248
+local display = Display()
 
 local chunkSz = 4
 
@@ -98,33 +97,43 @@ function calculateDisplacement(amount)
         xDisplace = math.sin(pRot) * amount
         yDisplace = amount - xDisplace
 
-        pY = pY + yDisplace
-        pX = pX + xDisplace
+        if (map[ math.floor((pX + xDisplace) + (pY + yDisplace) * mapHeight) ] != 1) then
+          pY = pY + yDisplace
+          pX = pX + xDisplace
+        end
 
     elseif pRot >= 1.57 and pRot <= 3.14  then
+
         local realRot = pRot
         yDisplace = math.sin(realRot) * amount
         xDisplace = (amount - yDisplace)
 
-        pY = pY - yDisplace
-        pX = pX + xDisplace
-
-
+        if (map[ math.floor((pX + xDisplace) + (pY - yDisplace) * mapHeight) ] != 1) then
+          pY = pY - yDisplace
+          pX = pX + xDisplace
+        end
 
     elseif pRot >= 3.14 and pRot < 4.71 then
+
         local realRot = pRot - (2 * 1.57)
         xDisplace = math.sin(realRot) * amount
         yDisplace = amount - xDisplace
 
-        pY = pY - yDisplace
-        pX = pX - xDisplace
+        if (map[ math.floor((pX - xDisplace) + (pY - yDisplace) * mapHeight) ] != 1) then
+          pY = pY - yDisplace
+          pX = pX - xDisplace
+        end
+
     else
+
         local realRot = pRot - (2 * 1.57)
         yDisplace = math.sin(realRot) * amount
         xDisplace = amount - yDisplace
 
-        pY = pY + yDisplace
-        pX = pX - xDisplace
+        if (map[ math.floor((pX - yDisplace) + (pY + yDisplace) * mapHeight) ] != 1) then
+          pY = pY + yDisplace
+          pX = pX - xDisplace
+        end
     end
 end
 
@@ -186,8 +195,8 @@ end
 -- the tilemap in a single call.
 RedrawDisplay()
 
-for i = 0, screenWidth, chunkSz do
-    local rayAngle = (pRot - fov / 2.0) + (i / screenWidth) * fov
+for i = 0, display.x, chunkSz do
+    local rayAngle = (pRot - fov / 2.0) + (i / display.x) * fov
     local distance = 0.0
 
     local collide = 0
@@ -223,8 +232,8 @@ for i = 0, screenWidth, chunkSz do
         end
     end
 
-    local ceiling = (screenHeight / 2.0) - (screenHeight / distance)
-    local floor = screenHeight - ceiling
+    local ceiling = (display.y / 2.0) - (display.y / distance)
+    local floor = display.y - ceiling
 
     local shading = 1
     shading = 10 - math.floor(distance + 0.5)
@@ -265,7 +274,7 @@ for i = 0, screenWidth, chunkSz do
     --   shading = 1
     -- end
 
-    for j = 0, screenHeight, chunkSz do
+    for j = 0, display.y, chunkSz do
 
         if j <= ceiling then
           -- DrawText( ",", j, i, DrawMode.Tile, "small", shading)
@@ -275,7 +284,7 @@ for i = 0, screenWidth, chunkSz do
 
         else
             local shade = "a"
-            local b = 1.0 - ((j - screenHeight / 2.0) / (screenHeight / 2.0));
+            local b = 1.0 - ((j - display.y / 2.0) / (display.y / 2.0));
 
             if b < 0.25 then
                 shade = "#";
@@ -325,33 +334,12 @@ function DrawTriangle(pointA, pointB, top, color)
   for x = aX, bX do
     y = equationOfALine(x, m, b)
     if top then
-      DrawRect(x, min(aY, bY), 1, abs(min(aY, bY) - y), color)
+      DrawRect(x, math.min(aY, bY), 1, math.abs(math.min(aY, bY) - y), color)
     else
-      DrawRect(x, y, 1, abs(y - aY), color)
+      DrawRect(x, y, 1, math.abs(y - aY), color)
     end
   end
 end
-
-
--- find max
-function min(a, b)
-  if a < b then
-    return a
-  else
-    return b
-  end
-end
-
-
--- absolute value
-function abs(value)
-  if value < 0 then
-    return value * -1
-  else
-    return value
-  end
-end
-
 
 -- return a y given an m and b for a given x
 function equationOfALine(x, m, b)
