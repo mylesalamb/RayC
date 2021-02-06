@@ -50,12 +50,10 @@ local screenHeight = 248
   ScreenBufferChip and draw a text box.
 ]]--
 function Init()
-
     -- Here we are manually changing the background color
     BackgroundColor(0)
 
     local display = Display()
-
 end
 
 --[[
@@ -63,10 +61,17 @@ end
   Update() on every frame before the Draw() method. It accepts one argument,
   timeDelta, which is the difference in milliseconds since the last frame.
 ]]--
+
 function Update(timeDelta)
+  DrawText(tostring(pX), 0, 0, DrawMode.Tile, "large", 15)
 
-    -- TODO add your own update logic here
+  if Key(Keys.W) then
+    pX = round(pX + 0.1, 1)
+  end
 
+  if Key(Keys.S) then
+    pX = round(pX - 0.1, 1)
+  end
 end
 
 --[[
@@ -151,10 +156,64 @@ function Draw()
                 -- DrawText( "-", j, i, DrawMode.Tile, "small", shading)
 
             end
-
         end
-
     end
-
 end
 
+
+-- draw a traingle
+function DrawTriangle(pointA, pointB, top, color)
+  aX, aY, bX, bY = pointA[1], pointA[2], pointB[1], pointB[2]
+
+  if aX > bX then
+    tempX, tempY = aX, aY
+    aX, aY = bX, bY
+    bX, bY = tempX, tempY
+  end
+
+  m = bY - aY / bX - aX
+  b = aY - (m * aX)
+
+  for x = aX, bX do
+    y = equationOfALine(x, m, b)
+    if top then
+      DrawRect(x, min(aY, bY), 1, abs(min(aY, bY) - y), color)
+    else
+      DrawRect(x, y, 1, abs(y - aY), color)
+    end
+  end
+end
+
+
+-- find max
+function min(a, b)
+  if a < b then
+    return a
+  else
+    return b
+  end
+end
+
+
+-- absolute value
+function abs(value)
+  if value < 0 then
+    return value * -1
+  else
+    return value
+  end
+end
+
+
+-- return a y given an m and b for a given x
+function equationOfALine(x, m, b)
+    local returnY = (m * x) + b
+    return round(returnY)
+end
+
+
+-- round
+function round(num, numDecimalPlaces)
+  local mult = 10^(numDecimalPlaces or 0)
+  return math.floor(num * mult + 0.5) / mult
+end
