@@ -80,35 +80,44 @@ function calculateDisplacement(amount)
         xDisplace = math.sin(pRot) * amount
         yDisplace = amount - xDisplace
 
-        pY = pY + yDisplace
-        pX = pX + xDisplace
+        if (map[ math.floor((pX + xDisplace) + (pY + yDisplace) * mapHeight) ] != 1) then
+          pY = pY + yDisplace
+          pX = pX + xDisplace
+        end
 
     elseif pRot >= 1.57 and pRot <= 3.14  then
+
         local realRot = pRot
         yDisplace = math.sin(realRot) * amount
         xDisplace = (amount - yDisplace)
 
-        pY = pY - yDisplace
-        pX = pX + xDisplace
-
-
+        if (map[ math.floor((pX + xDisplace) + (pY - yDisplace) * mapHeight) ] != 1) then
+          pY = pY - yDisplace
+          pX = pX + xDisplace
+        end
 
     elseif pRot >= 3.14 and pRot < 4.71 then
+
         local realRot = pRot - (2 * 1.57)
         xDisplace = math.sin(realRot) * amount
         yDisplace = amount - xDisplace
 
-        pY = pY - yDisplace
-        pX = pX - xDisplace
+        if (map[ math.floor((pX - xDisplace) + (pY - yDisplace) * mapHeight) ] != 1) then
+          pY = pY - yDisplace
+          pX = pX - xDisplace
+        end
+
     else
+
         local realRot = pRot - (2 * 1.57)
         yDisplace = math.sin(realRot) * amount
         xDisplace = amount - yDisplace
 
-        pY = pY + yDisplace
-        pX = pX - xDisplace
+        if (map[ math.floor((pX - yDisplace) + (pY + yDisplace) * mapHeight) ] != 1) then
+          pY = pY + yDisplace
+          pX = pX - xDisplace
+        end
     end
-
 
 end
 
