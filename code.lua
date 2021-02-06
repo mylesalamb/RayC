@@ -10,31 +10,86 @@
   Learn more about making Pixel Vision 8 games at
   https://www.pixelvision8.com/getting-started
 ]] --
---[[
-  This this is an empty game, we will the following text. We combined two sets
-  of fonts into the default.font.png. Use uppercase for larger characters and
-  lowercase for a smaller one.
-]] --
 
-local message = "Hello this is a message from the game"
-local map = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,1,
-             1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,1,
-             1, 0, 0, 0, 1, 1, 1, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,1, 
-             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1, 
-             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,}
+local Vector = require 'vector'
+
+
+-- Boundary Class
+Boundary = {}
+Boundary.__index = Boundary
+
+function Boundary:create (x1, y1, x2, y2)
+  local boundary = {}
+  setmetatable(boundary, Boundary)
+  boundary.a = Vector(x1, y1)
+  boundary.b = Vector(x2, y2)
+  return boundary
+end
+
+
+-- Ray Class
+Ray = {}
+Ray.__index = Ray
+
+function Ray:create (x1, y1)
+  local ray = {}
+  setmetatable(ray, Ray)
+  ray.pos = Vector(x1, y1)
+  ray.dir = Vector(1, 0)
+  return ray
+end
+
+function Ray:cast(wall)
+  local x1, y1, x2, y2 = wall.a[1], wall.a[2], wall.b[1], wall.b[2]
+  local x3, y3 = self.pos[1], self.pos[2]
+  local x4, y4 = self.pos.__add(self.dir)[1], self.pos.__add(self.dir)[2]
+
+  den = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
+  if den == 0 then
+    return
+  end
+
+  t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / den
+  u = -1 * (((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / den)
+
+  if (t > 0 and t < 1 and u > 0) then
+    return true
+  else
+    return
+  end
+end
+
+
+-- world map
+local map = {
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+}
+
+
+-- world representation as a list of vector Boundary
+local world = {
+  Boundary:create(0, 0, 0, 16),
+  Boundary:create(0, 0, 16, 0),
+  Boundary:create(0, 16, 16, 16),
+  Boundary:create(16, 0, 16, 16),
+}
 
 -- local map = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 
@@ -73,45 +128,39 @@ end
 ]]--
 
 function calculateDisplacement(amount)
+  -- we have cases in four quadrants to find the displacement along the line
+  -- the user presses the forward key but this does not translate to a pure X movement
 
-    -- we have cases in four quadrants to find the displacement along the line
-    -- the user presses the forward key but this does not translate to a pure X movement
+  if pRot >= 0 and pRot <= 1.57 then
+    xDisplace = math.sin(pRot) * amount
+    yDisplace = amount - xDisplace
 
-    if pRot >= 0 and pRot <= 1.57 then
-        
-        xDisplace = math.sin(pRot) * amount
-        yDisplace = amount - xDisplace
+    pY = pY + yDisplace
+    pX = pX + xDisplace
+  
+  elseif pRot >= 1.57 and pRot <= 3.14  then
+    local realRot = pRot
+    yDisplace = math.sin(realRot) * amount
+    xDisplace = (amount - yDisplace)
 
-        pY = pY + yDisplace
-        pX = pX + xDisplace
-    
-    elseif pRot >= 1.57 and pRot <= 3.14  then
-        local realRot = pRot
-        yDisplace = math.sin(realRot) * amount
-        xDisplace = (amount - yDisplace)
+    pY = pY - yDisplace
+    pX = pX + xDisplace
+  
+  elseif pRot >= 3.14 and pRot < 4.71 then
+    local realRot = pRot - (2 * 1.57)
+    xDisplace = math.sin(realRot) * amount
+    yDisplace = amount - xDisplace
 
-        pY = pY - yDisplace
-        pX = pX + xDisplace
+    pY = pY - yDisplace
+    pX = pX - xDisplace
+  else
+    local realRot = pRot - (2 * 1.57)
+    yDisplace = math.sin(realRot) * amount
+    xDisplace = amount - yDisplace
 
-
-    
-    elseif pRot >= 3.14 and pRot < 4.71 then
-        local realRot = pRot - (2 * 1.57)
-        xDisplace = math.sin(realRot) * amount
-        yDisplace = amount - xDisplace
-
-        pY = pY - yDisplace
-        pX = pX - xDisplace
-    else
-        local realRot = pRot - (2 * 1.57)
-        yDisplace = math.sin(realRot) * amount
-        xDisplace = amount - yDisplace
-
-        pY = pY + yDisplace
-        pX = pX - xDisplace
-    end
-
-
+    pY = pY + yDisplace
+    pX = pX - xDisplace
+  end
 end
 
 local doUpdate = 1
@@ -119,6 +168,10 @@ function Update(timeDelta)
   DrawText("pX: " .. tostring(round(pX, 1)), 0, 0, DrawMode.Tile, "medium", 15)
   DrawText("pY: " .. tostring(round(pY, 1)), 0, 1, DrawMode.Tile, "medium", 15)
   DrawText("pR: " .. tostring(round(pRot, 1)), 0, 2, DrawMode.Tile, "medium", 15)
+
+  local ray = Ray:create(1, 1)
+  local pt = ray:cast(world[1])
+  DrawText("intersect: " .. tostring(pt), 0, 2, DrawMode.Tile, "medium", 15)
 
   doUpdate = 0
 
@@ -146,6 +199,14 @@ function Update(timeDelta)
     if pRot > 6.23 then
         pRot = 0
     end
+    doUpdate = 1
+  end
+
+  -- reset to start
+  if Key(Keys.R) then
+    pX = 5.0
+    pY = 3.0
+    pRot = 0
     doUpdate = 1
   end
 
@@ -190,14 +251,18 @@ for i = 1, screenWidth, chunkSz do
     local floor = screenHeight - ceiling
 
     local shading = 1
-    if distance <= depth / 4.0 then
-    shading = 1
+    if distance <= depth / 6.0 then
+      shading = 6
+    elseif distance <= depth / 5.0 then
+      shading = 5
+    elseif distance <= depth / 4.0 then
+      shading = 4
     elseif distance <= depth / 3.0 then
-    shading = 2
+      shading = 3
     elseif distance <= depth / 2.0 then
-    shading = 3
-    else
-    shading = 4
+      shading = 2
+    elseif distance <= depth / 1.0 then
+      shading = 1
     end
 
     for j = 1, screenHeight, chunkSz do
