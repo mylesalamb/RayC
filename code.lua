@@ -11,7 +11,37 @@
   https://www.pixelvision8.com/getting-started
 ]] --
 
-local Vector = require 'vector'
+-- Vector Class
+Vector = {}
+Vector.__index = Vector
+
+function Vector:create (x1, y1)
+  local vec = {}
+  setmetatable(vec, Vector)
+  vec.i = x1
+  vec.j = y1
+  return vec
+end
+
+function Vector:add(v)
+  return Vector:create(self.i + v.i, self.j + v.j)
+end
+
+function Vector:mul( v )
+  return self.i * v.i + self.j * v.j
+end
+
+function Vector:tostring()
+  return ("<%g, %g>"):format(self.i, self.j)
+end
+
+function Vector:magnitude()
+  return math.sqrt( self * self )
+end
+
+function Vector:normalise()
+  return math.sqrt( self * self )
+end
 
 
 -- Boundary Class
@@ -21,8 +51,8 @@ Boundary.__index = Boundary
 function Boundary:create (x1, y1, x2, y2)
   local boundary = {}
   setmetatable(boundary, Boundary)
-  boundary.a = Vector(x1, y1)
-  boundary.b = Vector(x2, y2)
+  boundary.a = Vector:create(x1, y1)
+  boundary.b = Vector:create(x2, y2)
   return boundary
 end
 
@@ -34,15 +64,22 @@ Ray.__index = Ray
 function Ray:create (x1, y1)
   local ray = {}
   setmetatable(ray, Ray)
-  ray.pos = Vector(x1, y1)
-  ray.dir = Vector(1, 0)
+  ray.pos = Vector:create(x1, y1)
+  ray.dir = Vector:create(1, 0)
   return ray
 end
 
+function Ray:setDirection(x, y)
+  self.dir.i = x - self.pos.i
+  self.dir.j = y - self.pos.j
+  self.dir:normalise()
+end
+
 function Ray:cast(wall)
-  local x1, y1, x2, y2 = wall.a[1], wall.a[2], wall.b[1], wall.b[2]
-  local x3, y3 = self.pos[1], self.pos[2]
-  local x4, y4 = self.pos.__add(self.dir)[1], self.pos.__add(self.dir)[2]
+  local x1, y1, x2, y2 = wall.a.i, wall.a.j, wall.b.i, wall.b.j
+  local x3, y3 = self.pos.i, self.pos.j
+  local point = self.pos:add(self.dir)
+  local x4, y4 = point.i, point.j
 
   den = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
   if den == 0 then
@@ -137,7 +174,7 @@ function calculateDisplacement(amount)
 
     pY = pY + yDisplace
     pX = pX + xDisplace
-  
+
   elseif pRot >= 1.57 and pRot <= 3.14  then
     local realRot = pRot
     yDisplace = math.sin(realRot) * amount
@@ -145,7 +182,7 @@ function calculateDisplacement(amount)
 
     pY = pY - yDisplace
     pX = pX + xDisplace
-  
+
   elseif pRot >= 3.14 and pRot < 4.71 then
     local realRot = pRot - (2 * 1.57)
     xDisplace = math.sin(realRot) * amount
@@ -170,7 +207,10 @@ function Update(timeDelta)
   DrawText("pR: " .. tostring(round(pRot, 1)), 0, 2, DrawMode.Tile, "medium", 15)
 
   local ray = Ray:create(1, 1)
-  local pt = ray:cast(world[1])
+  local pt = ray:cast(world[4])
+  if pt == nil then
+    pt = ""
+  end
   DrawText("intersect: " .. tostring(pt), 0, 2, DrawMode.Tile, "medium", 15)
 
   doUpdate = 0
@@ -229,7 +269,7 @@ for i = 1, screenWidth, chunkSz do
     local eyeY = math.cos(rayAngle)
 
     while collide ~= 1 and distance < depth do
-      
+
 
         distance = distance + 0.5
 
@@ -244,7 +284,7 @@ for i = 1, screenWidth, chunkSz do
                 collide = 1
             end
         end
-        
+
     end
 
     local ceiling = (screenHeight / 2.0) - (screenHeight / distance)
@@ -266,7 +306,7 @@ for i = 1, screenWidth, chunkSz do
     end
 
     for j = 1, screenHeight, chunkSz do
-      
+
         if j <= ceiling then
           -- DrawText( ",", j, i, DrawMode.Tile, "small", shading)
 
@@ -305,7 +345,7 @@ end
 ]]--
 function Draw()
 
-    
+
 end
 
 
