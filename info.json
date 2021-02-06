@@ -7,5 +7,7 @@
     "cartChip":"PV8",
     "soundChip":"PV8",
     "ignoreProcessing":"False",
+    "ignoreOptimizeWarning":"False",
+    "paletteMode":"false",
     
 }

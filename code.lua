@@ -17,42 +17,40 @@
 ]] --
 
 local message = "Hello this is a message from the game"
-local map = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,1,
-             1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,1,
-             1, 0, 0, 0, 1, 1, 1, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,1, 
-             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1,
-             1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 1, 
-             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,}
+local map = nil
+
+
 
 -- local map = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 
-local pX = 5.0
+local pX = 3.0
 local pY = 3.0
 local pRot = 0
 
-local mapWidth = 10
-local mapHeight = 10
-local fov = 3.14159 / 1.5
+local mapWidth = 18
+local mapHeight = 18
+local fov = 0.6 --3.14159 / 2.0
 
 local depth = 18.0
 local speed = 5.0
 
-local screenWidth = 264
+local screenWidth = 256
 local screenHeight = 248
 
-local chunkSz = 2
+local chunkSz = 4
+
+function InitMap()
+  map = {}
+  for i=0, mapWidth - 1, 1 do
+    for j=0, mapHeight - 1, 1 do
+      local cell = 0
+      if i == 0 or j == 0 or i == mapWidth - 1 or j == mapHeight - 1 then
+        cell = 1
+      end
+      map[i + j * mapHeight] = cell
+    end
+  end
+end
 
 --[[
   The Init() method is part of the game's lifecycle and called a game starts.
@@ -62,6 +60,7 @@ local chunkSz = 2
 function Init()
     -- Here we are manually changing the background color
     BackgroundColor(0)
+    InitMap()
 
     local display = Display()
 end
@@ -116,19 +115,21 @@ end
 
 local doUpdate = 1
 function Update(timeDelta)
-  DrawText("pX: " .. tostring(round(pX, 1)), 0, 0, DrawMode.Tile, "medium", 15)
-  DrawText("pY: " .. tostring(round(pY, 1)), 0, 1, DrawMode.Tile, "medium", 15)
-  DrawText("pR: " .. tostring(round(pRot, 1)), 0, 2, DrawMode.Tile, "medium", 15)
+  DrawText("pX: " .. tostring(round(pX, 1)), 0, 0, DrawMode.Tile, "large", 15)
+  DrawText("pY: " .. tostring(round(pY, 1)), 0, 1, DrawMode.Tile, "large", 15)
+  DrawText("pR: " .. tostring(round(pRot, 1)), 0, 2, DrawMode.Tile, "large", 15)
+  DrawText("fov: " .. tostring(round(fov, 1)), 0, 3, DrawMode.Tile, "large", 15)
+
 
   doUpdate = 0
 
   if Key(Keys.W) then
-    calculateDisplacement(0.5)
+    calculateDisplacement(0.1)
     doUpdate = 1
   end
 
   if Key(Keys.S) then
-    calculateDisplacement(-0.5)
+    calculateDisplacement(-0.1)
     doUpdate = 1
   end
 
@@ -149,6 +150,16 @@ function Update(timeDelta)
     doUpdate = 1
   end
 
+  if Key(Keys.R) then
+    fov = fov + 0.1
+    doUpdate = 1
+  end
+
+  if Key(Keys.T) then
+    fov = fov - 0.1
+    doUpdate = 1
+  end
+
 
   if doUpdate == 0 then
     return
@@ -158,7 +169,7 @@ end
 -- the tilemap in a single call.
 RedrawDisplay()
 
-for i = 1, screenWidth, chunkSz do
+for i = 0, screenWidth, chunkSz do
     local rayAngle = (pRot - fov / 2.0) + (i / screenWidth) * fov
     local distance = 0.0
 
@@ -172,14 +183,14 @@ for i = 1, screenWidth, chunkSz do
 
         distance = distance + 0.5
 
-        local test_col = math.floor(pX + eyeX * distance)
-        local test_row = math.floor(pY + eyeY * distance)
+        local test_col = math.floor(pX + eyeX * distance + 0.5)
+        local test_row = math.floor(pY + eyeY * distance + 0.5)
 
         if test_col < 0 or test_col >= mapWidth or test_row < 0 or test_row >= mapHeight then
             collide = 1
             distance = depth
         else
-            if map[ (test_col - 1) * mapWidth + test_row] == 1 then
+            if map[ ((test_col) * mapWidth + test_row)] == 1 then
                 collide = 1
             end
         end
@@ -190,9 +201,9 @@ for i = 1, screenWidth, chunkSz do
     local floor = screenHeight - ceiling
 
     local shading = 1
-    if distance <= depth / 4.0 then
+    if distance <= depth / 6.0 then
     shading = 1
-    elseif distance <= depth / 3.0 then
+    elseif distance <= depth / 4.0 then
     shading = 2
     elseif distance <= depth / 2.0 then
     shading = 3
@@ -200,7 +211,7 @@ for i = 1, screenWidth, chunkSz do
     shading = 4
     end
 
-    for j = 1, screenHeight, chunkSz do
+    for j = 0, screenHeight, chunkSz do
       
         if j <= ceiling then
           -- DrawText( ",", j, i, DrawMode.Tile, "small", shading)
