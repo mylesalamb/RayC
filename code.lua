@@ -64,11 +64,14 @@ function DrawFrame()
 
 end
 
+local objective = {}
+
 function randomObjective()
-    local i = math.random(2, mapWidth - 2)
-    local j = math.random(2, mapHeight - 2)
+    local i = math.random(3, mapWidth - 2)
+    local j = math.random(3, mapHeight - 2)
 
     map[i + j * mapHeight] = 2
+    objective = {i, j}
 end
 
 function defineExit()
@@ -108,11 +111,11 @@ function calculateDisplacement(amount)
         xDisplace = math.sin(pRot) * amount
         yDisplace = amount - xDisplace
 
-        state = map[math.floor(pX + xDisplace) + math.floor(pY + yDisplace) * mapWidth]
-        if (state ~= 1) then
-          if state == 2 then
-            map[math.floor(pX + xDisplace) + math.floor(pY + yDisplace) * mapWidth] = 0
+        if (map[math.floor(pX + xDisplace) + math.floor(pY + yDisplace) * mapWidth] ~= 1) then
+          if (math.floor(pX + xDisplace) == objective[1] and math.floor(pY + yDisplace) == objective[2]) then
+            map[objective[1] + objective[2] * mapWidth] = 0
             exitHidden = false
+            DrawText("objective found!", 0, 0, DrawMode.UI, "large", 15)
           end
           pY = pY + yDisplace
           pX = pX + xDisplace
@@ -124,11 +127,11 @@ function calculateDisplacement(amount)
         yDisplace = math.sin(realRot) * amount
         xDisplace = (amount - yDisplace)
 
-        state = map[math.floor(pX + xDisplace) + math.floor(pY - yDisplace) * mapWidth]
-        if (state ~= 1) then
-          if state == 2 then
-            map[math.floor(pX + xDisplace) + math.floor(pY - yDisplace) * mapWidth] = 0
+        if (map[math.floor(pX + xDisplace) + math.floor(pY - yDisplace) * mapWidth] ~= 1) then
+          if (math.floor(pX + xDisplace) == objective[1] and math.floor(pY - yDisplace) == objective[2]) then
+            map[objective[1] + objective[2] * mapWidth] = 0
             exitHidden = false
+            DrawText("objective found!", 0, 0, DrawMode.UI, "large", 15)
           end
           pY = pY - yDisplace
           pX = pX + xDisplace
@@ -140,11 +143,11 @@ function calculateDisplacement(amount)
         xDisplace = math.sin(realRot) * amount
         yDisplace = amount - xDisplace
 
-        state = map[math.floor(pX - xDisplace) + math.floor(pY - yDisplace) * mapWidth]
-        if (state ~= 1) then
-          if state == 2 then
-            map[math.floor(pX - xDisplace) + math.floor(pY - yDisplace) * mapWidth] = 0
+        if (map[math.floor(pX - xDisplace) + math.floor(pY - yDisplace) * mapWidth] ~= 1) then
+          if (math.floor(pX - xDisplace) == objective[1] and math.floor(pY - yDisplace) == objective[2]) == 2 then
+            map[objective[1] + objective[2] * mapWidth] = 0
             exitHidden = false
+            DrawText("objective found!", 0, 0, DrawMode.UI, "large", 15)
           end
           pY = pY - yDisplace
           pX = pX - xDisplace
@@ -156,11 +159,11 @@ function calculateDisplacement(amount)
         yDisplace = math.sin(realRot) * amount
         xDisplace = amount - yDisplace
 
-        state = map[math.floor((pX - xDisplace) + (pY + yDisplace) * mapWidth)]
-        if (state ~= 1) then
-          if state == 2 then
-            map[math.floor((pX - xDisplace) + (pY + yDisplace) * mapWidth)] = 0
+        if (map[math.floor((pX - xDisplace) + (pY + yDisplace) * mapWidth)] ~= 1) then
+          if (math.floor(pX - xDisplace) == objective[1] and math.floor(pY + yDisplace) == objective[2]) == 2 then
+            map[objective[1] + objective[2] * mapWidth] = 0
             exitHidden = false
+            DrawText("objective found!", 0, 0, DrawMode.UI, "large", 15)
           end
           pY = pY + yDisplace
           pX = pX - xDisplace
