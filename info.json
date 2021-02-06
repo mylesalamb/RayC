@@ -3,9 +3,11 @@
     "description":"A PV8 Game Template.",
     "version":"v1.0.0",
     "ext":".pv8",
-    "gpuChip":"PV8",
+    "gpuChip":"Custom",
     "cartChip":"PV8",
     "soundChip":"PV8",
     "ignoreProcessing":"False",
+    "ignoreOptimizeWarning":"False",
+    "paletteMode":"false",
     
 }
