@@ -52,6 +52,21 @@ function InitMap()
   end
 end
 
+
+function randomObjective()
+  local i = math.random(3, 16)
+  local j = math.random(3, 16)
+
+  map[i + j * mapHeight] = 2
+end
+
+function defineExit()
+  local i = 0
+  local j = 10
+
+  map[i + j * mapHeight] = 3
+end
+
 --[[
   The Init() method is part of the game's lifecycle and called a game starts.
   We are going to use this method to configure background color,
@@ -61,6 +76,8 @@ function Init()
     -- Here we are manually changing the background color
     BackgroundColor(0)
     InitMap()
+    randomObjective()
+    defineExit()
 
     local display = Display()
 end
@@ -109,10 +126,10 @@ function calculateDisplacement(amount)
         pY = pY + yDisplace
         pX = pX - xDisplace
     end
-
-
 end
 
+
+local exitHidden = true
 local doUpdate = 1
 function Update(timeDelta)
   DrawText("pX: " .. tostring(round(pX, 1)), 0, 0, DrawMode.Tile, "large", 15)
@@ -175,6 +192,9 @@ for i = 0, screenWidth, chunkSz do
 
     local collide = 0
 
+    local objective = false
+    local exit = false
+
     local eyeX = math.sin(rayAngle)
     local eyeY = math.cos(rayAngle)
 
@@ -190,11 +210,17 @@ for i = 0, screenWidth, chunkSz do
             collide = 1
             distance = depth
         else
-            if map[ ((test_col) * mapWidth + test_row)] == 1 then
-                collide = 1
+            local var = map[ ((test_col) * mapWidth + test_row)]
+            if var == 1 then
+              collide = 1
+            elseif var == 2 then
+              collide = 1
+              objective = true
+            elseif var == 3 then
+              collide = 1
+              exit = true
             end
         end
-
     end
 
     local ceiling = (screenHeight / 2.0) - (screenHeight / distance)
@@ -205,7 +231,18 @@ for i = 0, screenWidth, chunkSz do
     if shading < 1 then
       shading = 1
     end
-    
+
+    if objective then
+      shading = 13
+      if distance < 10 then
+        shading = 12
+      elseif distance < 5 then
+        shading = 11
+      end
+    elseif exit and not exitHidden then
+      shading = 15
+    end
+
     -- if distance <= depth / 6.0 then
     --   shading = 6
     -- elseif distance <= depth / 5.0 then
