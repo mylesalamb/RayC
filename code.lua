@@ -10,7 +10,7 @@ local pRot = 0
 
 local mapWidth = 12
 local mapHeight = 12
-local fov = 0.6 -- 3.14159 / 2.0
+local fov = 0.4 -- 3.14159 / 2.0
 
 local depth = 12.0
 local speed = 5.0
@@ -71,7 +71,8 @@ function randomObjective()
     local j = math.random(3, mapHeight - 2)
 
     map[i + j * mapHeight] = 2
-    objective = {i, j}
+    objective[1] = i
+    objective[2] = j
 end
 
 function defineExit()
@@ -192,7 +193,7 @@ function Update(timeDelta)
     end
 
     if Key(Keys.A) then
-        pRot = round(pRot - 0.1, 1)
+        pRot = pRot - 0.05
         if pRot < 0 then
             pRot = 6.23
         end
@@ -200,7 +201,7 @@ function Update(timeDelta)
     end
 
     if Key(Keys.D) then
-        pRot = round(pRot + 0.1, 1)
+        pRot = pRot + 0.05
         if pRot > 6.23 then
             pRot = 0
         end
@@ -336,7 +337,7 @@ function Update(timeDelta)
                         shade = " ";
                     end
 
-                    -- DrawText(shade, i, j, DrawMode.UI, "small", 2)
+                    DrawText(shade, i, j, DrawMode.UI, "small", 2)
                 end
             end
         end
