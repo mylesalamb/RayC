@@ -60,8 +60,6 @@ function Init()
     -- Here we are manually changing the background color
     BackgroundColor(0)
     InitMap()
-
-    local display = Display()
 end
 
 --[[
