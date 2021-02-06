@@ -10,7 +10,7 @@ local pRot = 0
 
 local mapWidth = 12
 local mapHeight = 12
-local fov = 0.4 -- 3.14159 / 2.0
+local fov = 1 -- 3.14159 / 2.0
 
 local depth = 12.0
 local speed = 5.0
@@ -65,14 +65,24 @@ function DrawFrame()
 end
 
 local objective = {}
+local exitHidden = true
 
 function randomObjective()
-    local i = math.random(3, mapWidth - 2)
-    local j = math.random(3, mapHeight - 2)
+    local i = math.random(4, mapWidth - 3)
+    local j = math.random(4, mapHeight - 3)
 
-    map[i + j * mapHeight] = 2
+    map[i + j * mapHeight] = 5
     objective[1] = i
     objective[2] = j
+
+    map[(i-1) + (j-1) * mapHeight] = 6
+    map[i + (j-1) * mapHeight] = 6
+    map[(i+1) + (j-1) * mapHeight] = 6
+    map[(i-1) + j * mapHeight] = 6
+    map[(i+1) + j * mapHeight] = 6
+    map[(i-1) + (j+1) * mapHeight] = 6
+    map[i + (j+1) * mapHeight] = 6
+    map[(i+1) + (j+1) * mapHeight] = 6
 end
 
 function defineExit()
@@ -80,6 +90,10 @@ function defineExit()
     local j = 8
 
     map[i + j * mapHeight] = 3
+
+    map[(i+1) + (j-1) * mapHeight] = 4
+    map[(i+1) + j * mapHeight] = 4
+    map[(i+1) + (j+1) * mapHeight] = 4
 end
 
 --[[
@@ -112,12 +126,18 @@ function calculateDisplacement(amount)
         xDisplace = math.sin(pRot) * amount
         yDisplace = amount - xDisplace
 
-        if (map[math.floor(pX + xDisplace) + math.floor(pY + yDisplace) * mapWidth] ~= 1) then
-          if (map[math.floor(pX + xDisplace) + math.floor(pY + yDisplace) * mapWidth] == 2) then
+        x = math.floor(pX + xDisplace)
+        y = math.floor(pY + yDisplace)
+
+        if (map[x + y * mapWidth] ~= 1) then
+          if (map[x + y * mapWidth] >= 5) then
             map[objective[1] + objective[2] * mapWidth] = 0
             exitHidden = false
             DrawText("objective found!", 0, 0, DrawMode.UI, "large", 15)
+          elseif (map[x + y * mapWidth] >= 3)
+            DrawText("You win!", 0, 1, DrawMode.UI, "large", 15)
           end
+
           pY = pY + yDisplace
           pX = pX + xDisplace
         end
@@ -128,12 +148,18 @@ function calculateDisplacement(amount)
         yDisplace = math.sin(realRot) * amount
         xDisplace = (amount - yDisplace)
 
-        if (map[math.floor(pX + xDisplace) + math.floor(pY - yDisplace) * mapWidth] ~= 1) then
-          if (map[math.floor(pX + xDisplace) + math.floor(pY - yDisplace) * mapWidth] == 2) then
+        x = math.floor(pX + xDisplace)
+        y = math.floor(pY - yDisplace)
+
+        if (map[x + y * mapWidth] ~= 1) then
+          if (map[x + y * mapWidth] >= 5) then
             map[objective[1] + objective[2] * mapWidth] = 0
             exitHidden = false
             DrawText("objective found!", 0, 0, DrawMode.UI, "large", 15)
+          elseif (map[x + y * mapWidth] >= 3)
+            DrawText("You win!", 0, 1, DrawMode.UI, "large", 15)
           end
+
           pY = pY - yDisplace
           pX = pX + xDisplace
         end
@@ -144,12 +170,18 @@ function calculateDisplacement(amount)
         xDisplace = math.sin(realRot) * amount
         yDisplace = amount - xDisplace
 
-        if (map[math.floor(pX - xDisplace) + math.floor(pY - yDisplace) * mapWidth] ~= 1) then
-          if (map[math.floor(pX - xDisplace) + math.floor(pY - yDisplace) * mapWidth] == 2) then
+        x = math.floor(pX - xDisplace)
+        y = math.floor(pY + yDisplace)
+
+        if (map[x + y * mapWidth] ~= 1) then
+          if (map[x + y * mapWidth] >= 5) then
             map[objective[1] + objective[2] * mapWidth] = 0
             exitHidden = false
             DrawText("objective found!", 0, 0, DrawMode.UI, "large", 15)
+          elseif (map[x + y * mapWidth] >= 3)
+            DrawText("You win!", 0, 1, DrawMode.UI, "large", 15)
           end
+
           pY = pY - yDisplace
           pX = pX - xDisplace
         end
@@ -160,25 +192,26 @@ function calculateDisplacement(amount)
         yDisplace = math.sin(realRot) * amount
         xDisplace = amount - yDisplace
 
-        if (map[math.floor((pX - xDisplace) + (pY + yDisplace) * mapWidth)] ~= 1) then
-          if (map[math.floor((pX - xDisplace) + (pY + yDisplace) * mapWidth)] == 2) then
+        x = math.floor(pX - xDisplace)
+        y = math.floor(pY - yDisplace)
+
+        if (map[x + y * mapWidth] ~= 1) then
+          if (map[x + y * mapWidth] >= 5) then
             map[objective[1] + objective[2] * mapWidth] = 0
             exitHidden = false
             DrawText("objective found!", 0, 0, DrawMode.UI, "large", 15)
+          elseif (map[x + y * mapWidth] >= 3)
+            DrawText("You win!", 0, 1, DrawMode.UI, "large", 15)
           end
+
           pY = pY + yDisplace
           pX = pX - xDisplace
         end
     end
 end
 
-local exitHidden = true
 local doUpdate = 1
 function Update(timeDelta)
-    DrawText("pX: " .. tostring(round(pX, 1)), 0, 0, DrawMode.Tile, "large", 15)
-    DrawText("pY: " .. tostring(round(pY, 1)), 0, 1, DrawMode.Tile, "large", 15)
-    DrawText("pR: " .. tostring(round(pRot, 1)), 0, 2, DrawMode.Tile, "large", 15)
-    DrawText("fov: " .. tostring(round(fov, 1)), 0, 3, DrawMode.Tile, "large", 15)
 
     doUpdate = 0
 
@@ -253,7 +286,7 @@ function Update(timeDelta)
                 local var = map[((test_col) * mapWidth + test_row)]
                 if var == 1 then
                     collide = 1
-                elseif var == 2 then
+                elseif var == 5 then
                     collide = 1
                     objective = true
                 elseif var == 3 then
