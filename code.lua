@@ -134,6 +134,8 @@ function Init()
 
     randomObjective(objective, 5)
     defineExit(0, 8)
+
+    PlaySong(0, true, 0 )
 end
 
 --[[
