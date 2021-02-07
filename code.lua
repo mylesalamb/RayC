@@ -19,7 +19,7 @@ local display = Display()
 local screenWidth = display.x
 local screenHeight = display.y
 
-local chunkSz = 4
+local chunkSz = 3
 
 local frameBuff = {}
 local frameWidth = math.floor(screenWidth / chunkSz)
@@ -47,7 +47,7 @@ function InitMap2()
               cell = 1
           end
 
-          if i >= 7 and j <= 5 then
+          if i >= 5 and i <= 7 and j <= 7 then
             cell = 1
           end
 
@@ -97,25 +97,29 @@ function randomObjective(obj, value)
 
     map[i + j * mapHeight] = value
 
-    map[(i-1) + (j-1) * mapHeight] = value + 1
-    map[i + (j-1) * mapHeight] = value + 1
-    map[(i+1) + (j-1) * mapHeight] = value + 1
-    map[(i-1) + j * mapHeight] = value + 1
-    map[(i+1) + j * mapHeight] = value + 1
-    map[(i-1) + (j+1) * mapHeight] = value + 1
-    map[i + (j+1) * mapHeight] = value + 1
-    map[(i+1) + (j+1) * mapHeight] = value + 1
+    -- map[(i-1) + (j-1) * mapHeight] = value + 1
+    -- map[i + (j-1) * mapHeight] = value + 1
+    -- map[(i+1) + (j-1) * mapHeight] = value + 1
+    -- map[(i-1) + j * mapHeight] = value + 1
+    -- map[(i+1) + j * mapHeight] = value + 1
+    -- map[(i-1) + (j+1) * mapHeight] = value + 1
+    -- map[i + (j+1) * mapHeight] = value + 1
+    -- map[(i+1) + (j+1) * mapHeight] = value + 1
 end
 
-function defineExit()
-    local i = 0
-    local j = 8
+function defineObjective(obj, value, i, j)
+  obj[1] = i
+  obj[2] = j
 
+  map[i + j * mapHeight] = value
+end
+
+function defineExit(i, j)
     map[i + j * mapHeight] = 3
 
-    map[1 + 7 * mapHeight] = 4
-    map[1 + 8 * mapHeight] = 4
-    map[1 + 9 * mapHeight] = 4
+    -- map[1 + 7 * mapHeight] = 4
+    -- map[1 + 8 * mapHeight] = 4
+    -- map[1 + 9 * mapHeight] = 4
 
     exitHidden = true
 end
@@ -131,7 +135,7 @@ function Init()
     InitMap()
 
     randomObjective(objective, 5)
-    defineExit()
+    defineExit(0, 8)
 end
 
 --[[
@@ -140,6 +144,7 @@ end
   timeDelta, which is the difference in milliseconds since the last frame.
 ]]--
 
+local numberOfObjectives = 1
 local text = "Find the objective!"
 function calculateDisplacement(amount)
 
@@ -218,34 +223,47 @@ end
 local level = 1
 function checkSpace(value, x, y)
     if (value >= 5) then
-      map[objective[1] + objective[2] * mapWidth] = 0
-      exitHidden = false
-      text = "Find the exit!"
+      if map[objective[1] + objective[2] * mapWidth] == 0 and objective2 ~= {} then
+        map[objective2[1] + objective2[2] * mapWidth] = 0
+      else
+        map[objective[1] + objective[2] * mapWidth] = 0
+        text = "Find the other objective!"
+      end
+      numberOfObjectives = numberOfObjectives - 1
+      if numberOfObjectives == 0 then
+        exitHidden = false
+        text = "Find the exit!"
+      end
     elseif (map[y + x * mapWidth] >= 3) then
       if level == 2 then
         InitMap2()
         -- randomly place the player in the room
         pX = 3
         pY = 3
-        pRot = 0
+        pRot = 2.2
+
+        defineObjective(objective, 5, 9, 3)
       else
         InitMap()
         -- randomly place the player in the room
         pX = math.random(3, mapWidth - 2)
         pY = math.random(3, mapWidth - 2)
         pRot = math.random(0, 4)
+
+        randomObjective(objective, 5)
       end
 
       text = "Find the objective"
-      randomObjective(objective, 5)
+      numberOfObjectives = 1
 
       if level > 2 then
         text = text .. "s!"
-        randomObjective(objective2, 7)
+        randomObjective(objective2, 5)
+        numberOfObjectives = 2
       end
 
 
-      defineExit()
+      defineExit(0, 8)
       level = level + 1
     end
 end
@@ -255,20 +273,21 @@ local lastWPressTime = 0
 local lastAPressTime = 0
 local lastSPressTime = 0
 local lastDPressTime = 0
-local delay = 0.05
+local turnDelay = 0.05
+local moveDelay = 0.06
 
 function Update(timeDelta)
 
     doUpdate = 0
     local currentTime = os.clock()
 
-    if Key(Keys.W) and (currentTime - lastWPressTime) > delay then
+    if Key(Keys.W) and (currentTime - lastWPressTime) > moveDelay then
         calculateDisplacement(0.1)
         doUpdate = 1
         lastWPressTime = currentTime
     end
 
-    if Key(Keys.A) and (currentTime - lastAPressTime) > delay then
+    if Key(Keys.A) and (currentTime - lastAPressTime) > turnDelay then
         pRot = pRot - 0.05
         if pRot < 0 then
             pRot = 6.23
@@ -277,13 +296,13 @@ function Update(timeDelta)
         lastAPressTime = currentTime
     end
 
-    if Key(Keys.S) and (currentTime - lastSPressTime) > delay then
+    if Key(Keys.S) and (currentTime - lastSPressTime) > moveDelay then
         calculateDisplacement(-0.1)
         doUpdate = 1
         lastSPressTime = currentTime
     end
 
-    if Key(Keys.D) and (currentTime - lastDPressTime) > delay then
+    if Key(Keys.D) and (currentTime - lastDPressTime) > turnDelay then
         pRot = pRot + 0.05
         if pRot > 6.23 then
             pRot = 0
