@@ -8,7 +8,7 @@ local pRot = 0
 
 local mapWidth = 12
 local mapHeight = 12
-local fov = 1 -- 3.14159 / 2.0
+local fov = 1.2 -- 3.14159 / 2.0
 
 local depth = 12.0
 local speed = 5.0
@@ -51,6 +51,40 @@ function InitMap2()
 
           map[i + j * mapHeight] = cell
       end
+  end
+end
+
+function InitMap3()
+  map = {}
+  for i = 0, mapWidth - 1, 1 do
+    for j = 0, mapHeight - 1, 1 do
+      local cell = 0
+      if i == 0 or j == 0 or i == mapWidth - 1 or j == mapHeight - 1 then
+        cell = 1
+      end
+      if (i < 5 and j < 5) or (i > 6 and j < 5) or (i < 5 and j > 6) or (i > 6 and j > 6) then
+        cell = 1
+      end
+      map[i + j * mapHeight] = cell
+    end
+  end
+end
+
+function InitMap4()
+  map = {}
+  for i = 0, mapWidth - 1, 1 do
+    for j = 0, mapHeight - 1, 1 do
+      local cell = 0
+      if i == 0 or j == 0 or i == mapWidth - 1 or j == mapHeight - 1 then
+        cell = 1
+      end
+
+      if (i < 9 and j == 4) or (i > 2 and j == 8) then
+        cell = 1
+      end
+
+      map[i + j * mapHeight] = cell
+    end
   end
 end
 
@@ -221,18 +255,14 @@ end
 local level = 1
 function checkSpace(value, x, y)
     if (value >= 5) then
-      if map[objective[1] + objective[2] * mapWidth] == 0 and objective2 ~= {} then
-        map[objective2[1] + objective2[2] * mapWidth] = 0
-      else
-        map[objective[1] + objective[2] * mapWidth] = 0
-        text = "Find the other objective!"
-      end
+      map[y + x * mapWidth] = 0
       numberOfObjectives = numberOfObjectives - 1
       if numberOfObjectives == 0 then
         exitHidden = false
         text = "Find the exit!"
       end
     elseif (map[y + x * mapWidth] >= 3) then
+      level = level + 1
       if level == 2 then
         InitMap2()
         -- randomly place the player in the room
@@ -241,6 +271,32 @@ function checkSpace(value, x, y)
         pRot = 2.2
 
         defineObjective(objective, 5, 9, 3)
+        defineExit(2, 0)
+        text = "Find the objective"
+        numberOfObjectives = 1
+      elseif level == 3 then
+        InitMap3()
+        -- randomly place the player in the room
+        pX = 5
+        pY = 1
+        pRot = 2.2
+
+        defineObjective(objective, 5, 5, 1)
+        defineObjective(objective2, 5, 5, 10)
+        defineExit(11, 6)
+        text = "Find the objectives!"
+        numberOfObjectives = 2
+      elseif level == 4 then
+        InitMap4()
+        -- randomly place the player in the room
+        pX = 2
+        pY = 2
+        pRot = 1.1
+
+        defineObjective(objective, 5, 10, 10)
+        defineExit(0, 10)
+        text = "Find the objective!"
+        numberOfObjectives = 1
       else
         InitMap()
         -- randomly place the player in the room
@@ -249,20 +305,17 @@ function checkSpace(value, x, y)
         pRot = math.random(0, 4)
 
         randomObjective(objective, 5)
+        text = "Find the objective"
+        numberOfObjectives = 1
+
+        defineExit(0, 8)
       end
 
-      text = "Find the objective"
-      numberOfObjectives = 1
-
-      if level > 2 then
+      if level > 4 then
         text = text .. "s!"
         randomObjective(objective2, 5)
         numberOfObjectives = 2
       end
-
-
-      defineExit(0, 8)
-      level = level + 1
     end
 end
 
@@ -454,7 +507,7 @@ end
 function Draw()
   DrawText("Level " .. tostring(level) .. ": " .. text, 0, 0, DrawMode.UI, "large", 14)
 
-  DrawText("x:" .. tostring(math.floor(pX + 0.5)) .. " y:" .. tostring(math.floor(pY + 0.5)), 0, 10, DrawMode.UI, "large", 14)
+  -- DrawText("x:" .. tostring(math.floor(pX + 0.5)) .. " y:" .. tostring(math.floor(pY + 0.5)), 0, 10, DrawMode.UI, "large", 14)
 end
 
 -- draw a traingle
