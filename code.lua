@@ -38,6 +38,26 @@ function InitMap()
     end
 end
 
+function InitMap2()
+  map = {}
+  for i = 0, mapWidth - 1, 1 do
+      for j = 0, mapHeight - 1, 1 do
+          local cell = 0
+          if i == 0 or j == 0 or i == mapWidth - 1 or j == mapHeight - 1 then
+              cell = 1
+          end
+
+          if i >= 7 and j <= 5 then
+            cell = 1
+          end
+
+          map[i + j * mapHeight] = cell
+      end
+  end
+end
+
+
+
 function InitFrame()
 
     frameBuff = {}
@@ -65,24 +85,26 @@ function DrawFrame()
 end
 
 local objective = {}
+local objective2 = {}
 local exitHidden = true
 
-function randomObjective()
+function randomObjective(obj, value)
     local i = math.random(4, mapWidth - 3)
     local j = math.random(4, mapHeight - 3)
 
-    map[i + j * mapHeight] = 5
-    objective[1] = i
-    objective[2] = j
+    obj[1] = i
+    obj[2] = j
 
-    map[(i-1) + (j-1) * mapHeight] = 6
-    map[i + (j-1) * mapHeight] = 6
-    map[(i+1) + (j-1) * mapHeight] = 6
-    map[(i-1) + j * mapHeight] = 6
-    map[(i+1) + j * mapHeight] = 6
-    map[(i-1) + (j+1) * mapHeight] = 6
-    map[i + (j+1) * mapHeight] = 6
-    map[(i+1) + (j+1) * mapHeight] = 6
+    map[i + j * mapHeight] = value
+
+    map[(i-1) + (j-1) * mapHeight] = value + 1
+    map[i + (j-1) * mapHeight] = value + 1
+    map[(i+1) + (j-1) * mapHeight] = value + 1
+    map[(i-1) + j * mapHeight] = value + 1
+    map[(i+1) + j * mapHeight] = value + 1
+    map[(i-1) + (j+1) * mapHeight] = value + 1
+    map[i + (j+1) * mapHeight] = value + 1
+    map[(i+1) + (j+1) * mapHeight] = value + 1
 end
 
 function defineExit()
@@ -91,9 +113,11 @@ function defineExit()
 
     map[i + j * mapHeight] = 3
 
-    map[(i+1) + (j-1) * mapHeight] = 4
-    map[(i+1) + j * mapHeight] = 4
-    map[(i+1) + (j+1) * mapHeight] = 4
+    map[1 + 7 * mapHeight] = 4
+    map[1 + 8 * mapHeight] = 4
+    map[1 + 9 * mapHeight] = 4
+
+    exitHidden = true
 end
 
 --[[
@@ -106,7 +130,7 @@ function Init()
     BackgroundColor(0)
     InitMap()
 
-    randomObjective()
+    randomObjective(objective, 5)
     defineExit()
 end
 
@@ -116,6 +140,7 @@ end
   timeDelta, which is the difference in milliseconds since the last frame.
 ]]--
 
+local text = "Find the objective!"
 function calculateDisplacement(amount)
 
     -- we have cases in four quadrants to find the displacement along the line
@@ -126,17 +151,12 @@ function calculateDisplacement(amount)
         xDisplace = math.sin(pRot) * amount
         yDisplace = amount - xDisplace
 
-        x = math.floor(pX + xDisplace)
-        y = math.floor(pY + yDisplace)
+        x = math.floor(pX + xDisplace + 0.5)
+        y = math.floor(pY + yDisplace + 0.5)
 
-        if (map[x + y * mapWidth] ~= 1) then
-          if (map[x + y * mapWidth] >= 5) then
-            map[objective[1] + objective[2] * mapWidth] = 0
-            exitHidden = false
-            DrawText("objective found!", 0, 0, DrawMode.UI, "large", 15)
-          elseif (map[x + y * mapWidth] >= 3)
-            DrawText("You win!", 0, 1, DrawMode.UI, "large", 15)
-          end
+        value = map[y + x * mapWidth]
+        if (value ~= 1) then
+          checkSpace(value, x, y)
 
           pY = pY + yDisplace
           pX = pX + xDisplace
@@ -148,17 +168,12 @@ function calculateDisplacement(amount)
         yDisplace = math.sin(realRot) * amount
         xDisplace = (amount - yDisplace)
 
-        x = math.floor(pX + xDisplace)
-        y = math.floor(pY - yDisplace)
+        x = math.floor(pX + xDisplace + 0.5)
+        y = math.floor(pY - yDisplace + 0.5)
 
-        if (map[x + y * mapWidth] ~= 1) then
-          if (map[x + y * mapWidth] >= 5) then
-            map[objective[1] + objective[2] * mapWidth] = 0
-            exitHidden = false
-            DrawText("objective found!", 0, 0, DrawMode.UI, "large", 15)
-          elseif (map[x + y * mapWidth] >= 3)
-            DrawText("You win!", 0, 1, DrawMode.UI, "large", 15)
-          end
+        value = map[y + x * mapWidth]
+        if (value ~= 1) then
+          checkSpace(value, x, y)
 
           pY = pY - yDisplace
           pX = pX + xDisplace
@@ -170,17 +185,12 @@ function calculateDisplacement(amount)
         xDisplace = math.sin(realRot) * amount
         yDisplace = amount - xDisplace
 
-        x = math.floor(pX - xDisplace)
-        y = math.floor(pY + yDisplace)
+        x = math.floor(pX - xDisplace + 0.5)
+        y = math.floor(pY + yDisplace + 0.5)
 
-        if (map[x + y * mapWidth] ~= 1) then
-          if (map[x + y * mapWidth] >= 5) then
-            map[objective[1] + objective[2] * mapWidth] = 0
-            exitHidden = false
-            DrawText("objective found!", 0, 0, DrawMode.UI, "large", 15)
-          elseif (map[x + y * mapWidth] >= 3)
-            DrawText("You win!", 0, 1, DrawMode.UI, "large", 15)
-          end
+        value = map[y + x * mapWidth]
+        if (value ~= 1) then
+          checkSpace(value, x, y)
 
           pY = pY - yDisplace
           pX = pX - xDisplace
@@ -192,17 +202,12 @@ function calculateDisplacement(amount)
         yDisplace = math.sin(realRot) * amount
         xDisplace = amount - yDisplace
 
-        x = math.floor(pX - xDisplace)
-        y = math.floor(pY - yDisplace)
+        x = math.floor(pX - xDisplace + 0.5)
+        y = math.floor(pY - yDisplace + 0.5)
 
-        if (map[x + y * mapWidth] ~= 1) then
-          if (map[x + y * mapWidth] >= 5) then
-            map[objective[1] + objective[2] * mapWidth] = 0
-            exitHidden = false
-            DrawText("objective found!", 0, 0, DrawMode.UI, "large", 15)
-          elseif (map[x + y * mapWidth] >= 3)
-            DrawText("You win!", 0, 1, DrawMode.UI, "large", 15)
-          end
+        value = map[y + x * mapWidth]
+        if (value ~= 1) then
+          checkSpace(value, x, y)
 
           pY = pY + yDisplace
           pX = pX - xDisplace
@@ -210,35 +215,81 @@ function calculateDisplacement(amount)
     end
 end
 
+local level = 1
+function checkSpace(value, x, y)
+    if (value >= 5) then
+      map[objective[1] + objective[2] * mapWidth] = 0
+      exitHidden = false
+      text = "Find the exit!"
+    elseif (map[y + x * mapWidth] >= 3) then
+      if level == 2 then
+        InitMap2()
+        -- randomly place the player in the room
+        pX = 3
+        pY = 3
+        pRot = 0
+      else
+        InitMap()
+        -- randomly place the player in the room
+        pX = math.random(3, mapWidth - 2)
+        pY = math.random(3, mapWidth - 2)
+        pRot = math.random(0, 4)
+      end
+
+      text = "Find the objective"
+      randomObjective(objective, 5)
+
+      if level > 2 then
+        text = text .. "s!"
+        randomObjective(objective2, 7)
+      end
+
+
+      defineExit()
+      level = level + 1
+    end
+end
+
 local doUpdate = 1
+local lastWPressTime = 0
+local lastAPressTime = 0
+local lastSPressTime = 0
+local lastDPressTime = 0
+local delay = 0.05
+
 function Update(timeDelta)
 
     doUpdate = 0
+    local currentTime = os.clock()
 
-    if Key(Keys.W) then
+    if Key(Keys.W) and (currentTime - lastWPressTime) > delay then
         calculateDisplacement(0.1)
         doUpdate = 1
+        lastWPressTime = currentTime
     end
 
-    if Key(Keys.S) then
-        calculateDisplacement(-0.1)
-        doUpdate = 1
-    end
-
-    if Key(Keys.A) then
+    if Key(Keys.A) and (currentTime - lastAPressTime) > delay then
         pRot = pRot - 0.05
         if pRot < 0 then
             pRot = 6.23
         end
         doUpdate = 1
+        lastAPressTime = currentTime
     end
 
-    if Key(Keys.D) then
+    if Key(Keys.S) and (currentTime - lastSPressTime) > delay then
+        calculateDisplacement(-0.1)
+        doUpdate = 1
+        lastSPressTime = currentTime
+    end
+
+    if Key(Keys.D) and (currentTime - lastDPressTime) > delay then
         pRot = pRot + 0.05
         if pRot > 6.23 then
             pRot = 0
         end
         doUpdate = 1
+        lastDPressTime = currentTime
     end
 
     if Key(Keys.R) then
@@ -384,7 +435,9 @@ end
   to render sprites to the display.
 ]]--
 function Draw()
+  DrawText("Level " .. tostring(level) .. ": " .. text, 0, 0, DrawMode.UI, "large", 14)
 
+  DrawText("x:" .. tostring(math.floor(pX + 0.5)) .. " y:" .. tostring(math.floor(pY + 0.5)), 0, 10, DrawMode.UI, "large", 14)
 end
 
 -- draw a traingle
